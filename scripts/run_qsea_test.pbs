@@ -1,0 +1,23 @@
+#!/bin/bash
+#PBS -N nf_medip_qsea
+#PBS -q long
+#PBS -l select=1:ncpus=2:mem=8gb
+#PBS -l walltime=96:00:00
+#PBS -o logs/nf_medip_qsea.out
+#PBS -e logs/nf_medip_qsea.err
+
+cd "$PBS_O_WORKDIR"
+mkdir -p logs
+
+source /home/shangying/miniconda3/bin/activate medip-nf
+module load singularity/4.2.1
+
+nextflow run . \
+  -profile hpc_singularity \
+  --input test_data/samplesheet.csv \
+  --fasta /projects/sychen/projects/patnsb/ebv_kd_medip/ref/GRCh38.p14.genome.fa \
+  --outdir results/fastq_to_bam_test \
+  --analysis_method qsea \
+  --contrast KD,control \
+  -resume
+

@@ -726,6 +726,179 @@ results/fastq_to_bam_test/markdup/*.markdup.metrics.txt
 results/fastq_to_bam_test/markdup/*.markdup.flagstat.txt
 ```
 
+The markdup-enabled run completed successfully on the HPC:
+
+```text
+Completed at: 12-May-2026 15:36:52
+Duration    : 15m 41s
+CPU hours   : 46.5 (85.4% cached)
+Succeeded   : 25
+Cached      : 24
+```
+
+Completed workflow:
+
+```text
+FASTQC_RAW
+TRIMGALORE_PAIRED
+FASTQC_TRIM
+BWA_MEM_SORT
+SAMTOOLS_MARKDUP
+BAM_FILTER
+POST_ALIGNMENT_QC
+BAM_COVERAGE
+MULTIQC
+```
+
+Recommended duplicate metric check:
+
+```bash
+grep -H "DUPLICATE" results/fastq_to_bam_test/markdup/*.markdup.metrics.txt
+```
+
+Next step:
+
+```text
+Inspect duplicate metrics, then implement QSEA using filtered duplicate-marked BAMs.
+```
+
+## 2026-05-12: nf-core Proposal Draft
+
+Prepared a local draft for the nf-core new pipeline proposal:
+
+```text
+docs/nf-core-proposal-draft.md
+```
+
+Current nf-core proposal process:
+
+- Create a new issue in `nf-core/proposals`.
+- Use the "New pipeline" issue template.
+- Proposal discussion checks scope, uniqueness, overlap with existing pipelines, and community interest.
+- Acceptance requires approval according to the proposal repository automation.
+
+References:
+
+- https://github.com/nf-core/proposals
+- https://nf-co.re/docs/tutorials/adding_a_pipeline/test_data
+- https://nf-co.re/docs/nf-core-tools/cli/pipelines/create
+
+## 2026-05-12: Combined QSEA Create-set and DMR Module
+
+Added the first QSEA downstream implementation.
+
+New files:
+
+```text
+bin/qsea_create_dmr.R
+modules/local/qsea_create_dmr.nf
+```
+
+Updated files:
+
+```text
+main.nf
+nextflow.config
+subworkflows/local/input_check.nf
+PROGRESS.md
+COMMAND_LOG.md
+```
+
+The QSEA module combines:
+
+```text
+filtered duplicate-marked BAMs
+  -> qsea sample table
+  -> createQseaSet
+  -> addCoverage
+  -> addCNV
+  -> addLibraryFactors
+  -> addPatternDensity
+  -> addOffset
+  -> addEnrichmentParameters
+  -> fitNBglm
+  -> addContrast
+  -> all-region beta/count tables
+  -> region-level statistics table
+  -> significant and delta-beta-filtered DMR tables
+  -> DMR BED
+```
+
+QSEA is opt-in for now:
+
+```bash
+--analysis_method qsea --contrast KD,control
+```
+
+Default:
+
+```text
+--analysis_method none
+```
+
+Important runtime note:
+
+- The module currently declares a Bioconductor base container:
+
+```text
+docker.io/bioconductor/bioconductor_docker:RELEASE_3_21
+```
+
+- This image may not include `qsea` and `BSgenome.Hsapiens.UCSC.hg38` by default.
+- If the first QSEA test fails due missing R packages, the next step is to create a dedicated QSEA container or switch this step to a Conda-enabled profile using `bioconductor-qsea`.
+
+QSEA output table design was refined so users can join outputs by a stable `region_id`.
+
+Main linked tables:
+
+```text
+qsea_region_stats.tsv
+qsea_beta_matrix.tsv
+qsea_counts_matrix.tsv
+qsea_region_annotation.tsv
+```
+
+All three include:
+
+```text
+region_id
+chr
+window_start
+window_end
+CpG_density
+```
+
+Purpose:
+
+- `qsea_region_stats.tsv`: DMR statistics, p-values, adjusted p-values, log2FC, deltaBeta, DMR flags.
+- `qsea_beta_matrix.tsv`: sample-level and group-mean beta-like methylation values.
+- `qsea_counts_matrix.tsv`: sample-level and group-mean counts.
+- `qsea_region_annotation.tsv`: ChIPseeker gene annotation for each QSEA window.
+
+The previous comprehensive `qsea_all_regions.tsv` is still written as a convenience/debug output.
+
+Region annotation uses ChIPseeker and is controlled by:
+
+```text
+--qsea_annotate_regions true
+--qsea_txdb TxDb.Hsapiens.UCSC.hg38.knownGene
+--qsea_orgdb org.Hs.eg.db
+--qsea_tss_upstream 3000
+--qsea_tss_downstream 3000
+```
+
+Added a separate PBS driver for explicit QSEA testing:
+
+```text
+scripts/run_qsea_test.pbs
+```
+
+Submit from the HPC repo root:
+
+```bash
+qsub scripts/run_qsea_test.pbs
+```
+
 
 ### Second Runtime Fix
 

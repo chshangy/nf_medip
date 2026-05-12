@@ -52,6 +52,10 @@ current_scripts/job_nf.pbs
   - `modules/local/bam_coverage.nf`
 - Added optional duplicate marking with `samtools markdup`:
   - `modules/local/samtools_markdup.nf`
+- Successfully tested duplicate marking on the HPC with PBS Pro and Singularity.
+- Added first combined QSEA create-set and DMR module:
+  - `bin/qsea_create_dmr.R`
+  - `modules/local/qsea_create_dmr.nf`
 - Successfully tested the current workflow on the HPC with PBS Pro and Singularity.
 - Started downstream design for user-selectable QSEA and MEDIPS analysis.
 
@@ -113,7 +117,7 @@ nextflow config -profile hpc_singularity
 
 ## Latest Successful HPC Test
 
-The pipeline ran successfully on 2026-05-12.
+The pipeline ran successfully on 2026-05-12, first without duplicate marking and then again with `samtools markdup` enabled.
 
 Completed stages:
 
@@ -122,7 +126,6 @@ FASTQC_RAW
 TRIMGALORE_PAIRED
 FASTQC_TRIM
 BWA_MEM_SORT
-SAMTOOLS_MARKDUP
 BAM_FILTER
 POST_ALIGNMENT_QC
 BAM_COVERAGE
@@ -137,6 +140,30 @@ Duration    : 3m 7s
 CPU hours   : 41.2 (98.3% cached)
 Succeeded   : 7
 Cached      : 36
+```
+
+Latest run with duplicate marking:
+
+```text
+Completed at: 12-May-2026 15:36:52
+Duration    : 15m 41s
+CPU hours   : 46.5 (85.4% cached)
+Succeeded   : 25
+Cached      : 24
+```
+
+Completed stages in latest run:
+
+```text
+FASTQC_RAW
+TRIMGALORE_PAIRED
+FASTQC_TRIM
+BWA_MEM_SORT
+SAMTOOLS_MARKDUP
+BAM_FILTER
+POST_ALIGNMENT_QC
+BAM_COVERAGE
+MULTIQC
 ```
 
 Expected result directories:
@@ -200,11 +227,11 @@ If the container does not include `samtools`, the HPC run may fail at alignment.
 
 ## Immediate Next Step After Restart
 
-1. Test the new optional duplicate-marking stage.
-2. Inspect duplicate metrics from `results/fastq_to_bam_test/markdup/`.
-3. Confirm filtered BAMs are now generated from marked BAMs.
-4. Decide region strategy for downstream quantification: fixed windows, CpG islands, promoters, or custom BED.
-5. Add downstream workflow modules for QSEA and MEDIPS.
+1. Inspect duplicate metrics from `results/fastq_to_bam_test/markdup/`.
+2. Confirm filtered BAMs are generated from marked BAMs and duplicate removal remains disabled by default.
+3. Test the QSEA downstream branch using filtered/duplicate-marked BAMs.
+4. Resolve QSEA runtime dependency/container strategy if needed.
+5. Add MEDIPS after QSEA is working.
 
 ## Downstream Analysis Direction
 
@@ -216,6 +243,9 @@ The downstream methylation matrix and DMR workflow should start after the filter
 Planned user-facing method parameters:
 
 ```text
+--analysis_method qsea
+--analysis_method medips
+--analysis_method both
 --methylation_method qsea
 --methylation_method medips
 --dmr_method qsea
@@ -225,8 +255,7 @@ Planned user-facing method parameters:
 Recommended default:
 
 ```text
---methylation_method qsea
---dmr_method qsea
+--analysis_method none
 ```
 
 Rationale:
@@ -234,3 +263,20 @@ Rationale:
 - QSEA is designed for MeDIP-seq/IP-seq data analysis and is described by Bioconductor as a successor to MEDIPS.
 - QSEA can generate methylation-like beta estimates from MeDIP-seq enrichment data.
 - MEDIPS remains useful as a known MeDIP-seq method and should be available as an alternative.
+
+For development, `analysis_method` currently defaults to `none` so the validated preprocessing workflow remains stable. QSEA is enabled explicitly with:
+
+```bash
+--analysis_method qsea --contrast KD,control
+```
+
+Main linked QSEA output tables:
+
+```text
+qsea_region_stats.tsv
+qsea_beta_matrix.tsv
+qsea_counts_matrix.tsv
+qsea_region_annotation.tsv
+```
+
+All tables use `region_id` so users can join region statistics, beta-like methylation values, counts, and ChIPseeker gene annotation.

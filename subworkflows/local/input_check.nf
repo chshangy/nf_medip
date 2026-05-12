@@ -11,7 +11,8 @@ workflow INPUT_CHECK {
                 id          : row.sample,
                 single_end  : false,
                 strandedness: row.strandedness ?: 'auto',
-                group       : row.group ?: 'NA'
+                group       : row.group ?: 'NA',
+                batch       : row.batch ?: 'batch1'
             ]
 
             if (!row.sample) {
@@ -27,4 +28,3 @@ workflow INPUT_CHECK {
     emit:
     reads = reads
 }
-
