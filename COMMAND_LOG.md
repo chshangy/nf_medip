@@ -477,6 +477,41 @@ Rerun after pulling the fix:
 qsub scripts/run_fastq_to_bam.pbs
 ```
 
+## 2026-05-12: FASTQ-to-BAM Runtime Fix for BWA/Samtools Container and Index Staging
+
+The next run reached `BWA_MEM_SORT` and failed with:
+
+```text
+.command.sh: line 8: samtools: command not found
+[E::bwa_idx_load_from_disk] fail to locate the index files
+```
+
+Causes:
+
+- The single-tool BWA Biocontainer does not include `samtools`.
+- The BWA index files were not staged with the FASTA inside the task work directory.
+
+Fix:
+
+- Switched the alignment module container to a mulled BWA+samtools image:
+
+```text
+quay.io/biocontainers/mulled-v2-fe8faa35dbf6dc65a0f7f5d4ea12e31a79f73e40:219b6c272b25e7e642ae3ff0bf0c5c81a5135ab4-0
+```
+
+- Updated `main.nf` to stage:
+
+```text
+${params.fasta}
+${params.fasta}.amb
+${params.fasta}.ann
+${params.fasta}.bwt
+${params.fasta}.pac
+${params.fasta}.sa
+```
+
+- Updated `BWA_MEM_SORT` to use the staged FASTA basename in the work directory.
+
 ### Second Runtime Fix
 
 The next run failed under Nextflow 26.04.0 with:

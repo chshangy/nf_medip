@@ -49,6 +49,15 @@ workflow {
             tuple(meta, [ file(row.fastq_1, checkIfExists: true), file(row.fastq_2, checkIfExists: true) ])
         }
 
+    ch_fasta = Channel.value(file(params.fasta, checkIfExists: true))
+    ch_bwa_index = Channel.value([
+        file("${params.fasta}.amb", checkIfExists: true),
+        file("${params.fasta}.ann", checkIfExists: true),
+        file("${params.fasta}.bwt", checkIfExists: true),
+        file("${params.fasta}.pac", checkIfExists: true),
+        file("${params.fasta}.sa", checkIfExists: true)
+    ])
+
     FASTQC_RAW(ch_reads)
 
     if (params.skip_trimming) {
@@ -69,7 +78,7 @@ workflow {
             .mix(TRIMGALORE_PAIRED.out.reports.map { meta, file -> file })
     }
 
-    BWA_MEM_SORT(ch_reads_for_alignment, params.fasta)
+    BWA_MEM_SORT(ch_reads_for_alignment, ch_fasta, ch_bwa_index)
 
     ch_multiqc_files = ch_multiqc_files
         .mix(BWA_MEM_SORT.out.flagstat.map { meta, file -> file })
