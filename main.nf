@@ -79,11 +79,3 @@ workflow {
 
     MULTIQC(ch_multiqc_files)
 }
-
-workflow.onComplete {
-    log.info ""
-    log.info "Pipeline completed at: ${workflow.complete}"
-    log.info "Duration: ${workflow.duration}"
-    log.info "Success: ${workflow.success}"
-    log.info "Results: ${params.outdir}"
-}

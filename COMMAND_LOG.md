@@ -411,3 +411,10 @@ Channel
 Fix:
 
 - Moved the `Channel.fromPath(...).splitCsv(...)` sample sheet parsing block into the entry workflow.
+
+The next run reported strict syntax failure for `workflow.onComplete`.
+
+Fix:
+
+- Removed the `workflow.onComplete` callback from `main.nf`.
+- Nextflow still records completion status in the standard log/report outputs.
