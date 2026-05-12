@@ -9,17 +9,6 @@ include { BWA_MEM_SORT } from './modules/local/bwa_mem_sort'
 include { MULTIQC } from './modules/local/multiqc'
 
 /*
- * Validate required parameters early.
- */
-if (!params.input) {
-    error "Please provide a sample sheet with --input"
-}
-
-if (!params.fasta) {
-    error "Please provide the BWA-indexed reference FASTA with --fasta"
-}
-
-/*
  * Parse samplesheet.csv.
  *
  * Required columns:
@@ -52,6 +41,14 @@ Channel
 
 workflow {
     main:
+    if (!params.input) {
+        error "Please provide a sample sheet with --input"
+    }
+
+    if (!params.fasta) {
+        error "Please provide the BWA-indexed reference FASTA with --fasta"
+    }
+
     FASTQC_RAW(ch_reads)
 
     if (params.skip_trimming) {

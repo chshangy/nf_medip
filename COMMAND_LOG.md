@@ -386,3 +386,16 @@ After pulling the fix on HPC, rerun:
 ```bash
 qsub scripts/run_fastq_to_bam.pbs
 ```
+
+### Second Runtime Fix
+
+The next run failed under Nextflow 26.04.0 with:
+
+```text
+Statements cannot be mixed with script declarations -- move statements into a process, workflow, or function
+```
+
+Fix:
+
+- Moved top-level `params.input` and `params.fasta` validation into the entry workflow.
+- Enabled `overwrite = true` for `trace`, `report`, `timeline`, and `dag` outputs so reruns can reuse the same `--outdir`.
