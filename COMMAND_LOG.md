@@ -595,6 +595,79 @@ Fix:
 
 This should allow the run to complete with `-resume` because upstream tasks already succeeded.
 
+## 2026-05-12: Successful FASTQ-to-BAM/QC/Coverage Run
+
+The current workflow completed successfully on the HPC using PBS Pro and Singularity.
+
+Completed stages:
+
+```text
+FASTQC_RAW
+TRIMGALORE_PAIRED
+FASTQC_TRIM
+BWA_MEM_SORT
+BAM_FILTER
+POST_ALIGNMENT_QC
+BAM_COVERAGE
+MULTIQC
+```
+
+Run summary from `logs/nf_medip_fastq_to_bam.out`:
+
+```text
+Completed at: 12-May-2026 14:50:27
+Duration    : 3m 7s
+CPU hours   : 41.2 (98.3% cached)
+Succeeded   : 7
+Cached      : 36
+```
+
+This confirms that the first major pipeline layer is working:
+
+```text
+raw FASTQ -> trimmed FASTQ -> sorted BAM -> filtered BAM -> post-alignment QC -> bigWig coverage -> MultiQC
+```
+
+Next planned implementation area:
+
+```text
+region quantification -> QSEA/MEDIPS methylation matrix -> DMR analysis
+```
+
+## 2026-05-12: QC Review Bundle Script
+
+Added a helper script to collect reviewable outputs from the successful FASTQ-to-BAM/QC/coverage run:
+
+```text
+scripts/collect_fastq_to_bam_qc.sh
+```
+
+Usage on HPC from the repo root:
+
+```bash
+cd /projects/sychen/projects/patnsb/medip/ebv-kd_medip/nf_medip_git
+bash scripts/collect_fastq_to_bam_qc.sh results/fastq_to_bam_test review_fastq_to_bam
+```
+
+The script creates:
+
+```text
+review_fastq_to_bam.tar.gz
+```
+
+The bundle includes:
+
+- MultiQC report and MultiQC data.
+- Pipeline info files.
+- Combined raw alignment flagstat summaries.
+- Combined filtered BAM flagstat summaries.
+- Selected samtools stats summaries.
+- Inventory of BAM/BAI/bigWig files without including the large files themselves.
+- Tail of `.nextflow.log`.
+- PBS stdout/stderr logs if present.
+
+The bundle intentionally excludes large FASTQ, BAM, BAI, bigWig, and container image files.
+
 
 ### Second Runtime Fix
 
