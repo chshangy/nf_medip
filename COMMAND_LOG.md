@@ -574,6 +574,27 @@ Coverage defaults:
 --effective_genome_size null
 ```
 
+## 2026-05-12: MultiQC Output Directory Fix
+
+The extended FASTQ-to-BAM/QC/coverage run reached the final `MULTIQC` process successfully, but Nextflow failed output validation:
+
+```text
+Missing output file(s) `multiqc_data` expected by process `MULTIQC`
+```
+
+MultiQC 1.25.1 wrote:
+
+```text
+multiqc_report_data
+multiqc_report.html
+```
+
+Fix:
+
+- Updated `modules/local/multiqc.nf` to accept `multiqc*_data` as the data output directory.
+
+This should allow the run to complete with `-resume` because upstream tasks already succeeded.
+
 
 ### Second Runtime Fix
 

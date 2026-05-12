@@ -11,7 +11,7 @@ process MULTIQC {
 
     output:
     path "multiqc_report.html", emit: report
-    path "multiqc_data",        emit: data
+    path "multiqc*_data",       emit: data
 
     script:
     """
@@ -21,4 +21,3 @@ process MULTIQC {
         .
     """
 }
-
