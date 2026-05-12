@@ -11,7 +11,7 @@ process TRIMGALORE_PAIRED {
     tuple val(meta), path(reads)
 
     output:
-    tuple val(meta), path("${meta.id}_val_1.fq.gz"), path("${meta.id}_val_2.fq.gz"), emit: reads
+    tuple val(meta), path("${meta.id}_val_*.fq.gz"), emit: reads
     tuple val(meta), path("${meta.id}_*.txt"), emit: reports
 
     script:
@@ -25,4 +25,3 @@ process TRIMGALORE_PAIRED {
         ${reads[1]}
     """
 }
-

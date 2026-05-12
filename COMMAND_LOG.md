@@ -387,6 +387,96 @@ After pulling the fix on HPC, rerun:
 qsub scripts/run_fastq_to_bam.pbs
 ```
 
+## 2026-05-12: Downstream Method Selection Plan
+
+The user requested support for both MEDIPS and QSEA for downstream methylation matrix generation and DMR analysis, with user-selectable options.
+
+Confirmed from Bioconductor documentation:
+
+- QSEA is an IP-seq analysis package developed as a successor to MEDIPS for MeDIP-seq.
+- QSEA supports transformation of enrichment data to methylation-like beta values and DMR analysis.
+
+References:
+
+- https://bioconductor.org/packages/release/bioc/html/qsea.html
+- https://bioconductor.org/packages/release/bioc/vignettes/qsea/inst/doc/qsea_tutorial.html
+
+Updated `nextflow.config` with downstream method parameters:
+
+```text
+--methylation_method qsea
+--methylation_method medips
+--dmr_method qsea
+--dmr_method medips
+--qsea_window_size
+--qsea_fragment_size
+--qsea_enrichment_pattern
+--qsea_norm_method
+--medips_window_size
+--medips_extend
+--medips_shift
+```
+
+Recommended default:
+
+```text
+--methylation_method qsea
+--dmr_method qsea
+```
+
+## 2026-05-12: FASTQ-to-BAM Runtime Fix for Trimmed Read Tuples
+
+The FASTQ-to-BAM PBS run reached the trimming stage, then aborted with:
+
+```text
+Input tuple does not match tuple declaration in process `BWA_MEM_SORT`
+offending value: [[id:S1E12, single_end:false, strandedness:auto, group:KD],
+S1E12_val_1.fq.gz,
+S1E12_val_2.fq.gz]
+```
+
+Cause:
+
+- `TRIMGALORE_PAIRED` emitted trimmed read pairs as three tuple fields:
+
+```text
+meta, read1, read2
+```
+
+- `BWA_MEM_SORT` expects the paired reads as one `path(reads)` list:
+
+```text
+meta, [read1, read2]
+```
+
+Fix:
+
+- Changed `TRIMGALORE_PAIRED` output to emit the trimmed pair as a single path collection:
+
+```nextflow
+tuple val(meta), path("${meta.id}_val_*.fq.gz"), emit: reads
+```
+
+The same run also showed:
+
+```text
+Directive `errorStrategy` doesn't support dynamic value
+```
+
+Fix:
+
+- Replaced the dynamic `errorStrategy` closure in `nextflow.config` with static:
+
+```nextflow
+errorStrategy = 'terminate'
+```
+
+Rerun after pulling the fix:
+
+```bash
+qsub scripts/run_fastq_to_bam.pbs
+```
+
 ### Second Runtime Fix
 
 The next run failed under Nextflow 26.04.0 with:
