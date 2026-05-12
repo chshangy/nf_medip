@@ -1,0 +1,7 @@
+sample,fastq_1,fastq_2,strandedness,group
+S1S21,/projects/sychen/projects/patnsb/medip/ebv-kd_medip/raw/S1S21/S1S21_DKDL250003486-1A_22YL5KLT3_L6_1.fq.gz,/projects/sychen/projects/patnsb/medip/ebv-kd_medip/raw/S1S21/S1S21_DKDL250003486-1A_22YL5KLT3_L6_2.fq.gz,auto,control
+S1S22,/projects/sychen/projects/patnsb/medip/ebv-kd_medip/raw/S1S22/S1S22_DKDL250003486-1A_22YL5KLT3_L6_1.fq.gz,/projects/sychen/projects/patnsb/medip/ebv-kd_medip/raw/S1S22/S1S22_DKDL250003486-1A_22YL5KLT3_L6_2.fq.gz,auto,control
+S1S23,/projects/sychen/projects/patnsb/medip/ebv-kd_medip/raw/S1S23/S1S23_DKDL250003486-1A_22YL5KLT3_L6_1.fq.gz,/projects/sychen/projects/patnsb/medip/ebv-kd_medip/raw/S1S23/S1S23_DKDL250003486-1A_22YL5KLT3_L6_2.fq.gz,auto,control
+S1E11,/projects/sychen/projects/patnsb/medip/ebv-kd_medip/raw/S1E11/S1E11_DKDL250003486-1A_22YL5KLT3_L6_1.fq.gz,/projects/sychen/projects/patnsb/medip/ebv-kd_medip/raw/S1E11/S1E11_DKDL250003486-1A_22YL5KLT3_L6_2.fq.gz,auto,KD
+S1E12,/projects/sychen/projects/patnsb/medip/ebv-kd_medip/raw/S1E12/S1E12_DKDL250003486-1A_22YL5KLT3_L6_1.fq.gz,/projects/sychen/projects/patnsb/medip/ebv-kd_medip/raw/S1E12/S1E12_DKDL250003486-1A_22YL5KLT3_L6_2.fq.gz,auto,KD
+S1E13,/projects/sychen/projects/patnsb/medip/ebv-kd_medip/raw/S1E13/S1E13_DKDL250003486-1A_22YL5KLT3_L6_1.fq.gz,/projects/sychen/projects/patnsb/medip/ebv-kd_medip/raw/S1E13/S1E13_DKDL250003486-1A_22YL5KLT3_L6_2.fq.gz,auto,KD

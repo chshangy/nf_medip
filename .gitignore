@@ -1,0 +1,51 @@
+# Nextflow runtime files
+.nextflow*
+work/
+results/
+
+# Container/cache directories
+singularity/
+apptainer/
+
+# Setup and runtime logs
+setup_logs/
+*.log
+*.out
+*.err
+
+# Large sequencing and alignment files
+*.fq.gz
+*.fastq.gz
+*.bam
+*.bai
+*.sam
+*.cram
+*.crai
+
+# Large reference/index files
+*.fa
+*.fasta
+*.fna
+*.fa.gz
+*.fasta.gz
+*.dict
+*.fai
+*.amb
+*.ann
+*.bwt
+*.pac
+*.sa
+
+# Common analysis outputs that should not be committed by default
+*.bigWig
+*.bw
+*.bedGraph
+*.bedgraph
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+

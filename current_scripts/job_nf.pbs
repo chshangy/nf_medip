@@ -1,0 +1,11 @@
+#!/bin/bash
+#PBS -q long
+#PBS -N nf_v1
+#PBS -l select=1:ncpus=12:mem=48g
+#PBS -l walltime=24:00:00
+#PBS -o nf_out.txt
+#PBS -e nf_error.txt
+
+cd $PBS_O_WORKDIR
+source /home/shangying/miniconda3/bin/activate nf-medip
+nextflow run nf_v4.nf -resume
