@@ -399,3 +399,15 @@ Fix:
 
 - Moved top-level `params.input` and `params.fasta` validation into the entry workflow.
 - Enabled `overwrite = true` for `trace`, `report`, `timeline`, and `dag` outputs so reruns can reuse the same `--outdir`.
+
+The following run reported the same strict syntax issue for top-level channel creation:
+
+```text
+Statements cannot be mixed with script declarations
+Channel
+    .fromPath(params.input, checkIfExists: true)
+```
+
+Fix:
+
+- Moved the `Channel.fromPath(...).splitCsv(...)` sample sheet parsing block into the entry workflow.

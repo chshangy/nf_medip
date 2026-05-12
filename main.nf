@@ -17,27 +17,6 @@ include { MULTIQC } from './modules/local/multiqc'
  * Optional columns are kept in metadata:
  *   strandedness,group
  */
-Channel
-    .fromPath(params.input, checkIfExists: true)
-    .splitCsv(header: true)
-    .map { row ->
-        def meta = [
-            id          : row.sample,
-            single_end  : false,
-            strandedness: row.strandedness ?: 'auto',
-            group       : row.group ?: 'NA'
-        ]
-
-        if (!row.sample) {
-            error "Samplesheet row is missing 'sample'"
-        }
-        if (!row.fastq_1 || !row.fastq_2) {
-            error "Sample '${row.sample}' is missing fastq_1 or fastq_2"
-        }
-
-        tuple(meta, [ file(row.fastq_1, checkIfExists: true), file(row.fastq_2, checkIfExists: true) ])
-    }
-    .set { ch_reads }
 
 workflow {
     main:
@@ -48,6 +27,27 @@ workflow {
     if (!params.fasta) {
         error "Please provide the BWA-indexed reference FASTA with --fasta"
     }
+
+    ch_reads = Channel
+        .fromPath(params.input, checkIfExists: true)
+        .splitCsv(header: true)
+        .map { row ->
+            def meta = [
+                id          : row.sample,
+                single_end  : false,
+                strandedness: row.strandedness ?: 'auto',
+                group       : row.group ?: 'NA'
+            ]
+
+            if (!row.sample) {
+                error "Samplesheet row is missing 'sample'"
+            }
+            if (!row.fastq_1 || !row.fastq_2) {
+                error "Sample '${row.sample}' is missing fastq_1 or fastq_2"
+            }
+
+            tuple(meta, [ file(row.fastq_1, checkIfExists: true), file(row.fastq_2, checkIfExists: true) ])
+        }
 
     FASTQC_RAW(ch_reads)
 
