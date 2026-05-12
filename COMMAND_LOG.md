@@ -335,3 +335,54 @@ git commit -m "Initial MeDIP-seq Nextflow pipeline project"
 git remote add origin https://github.com/YOUR_USERNAME/nf_medip.git
 git push -u origin main
 ```
+
+## 2026-05-12: PBS Driver Script for FASTQ-to-BAM Test
+
+Added the HPC PBS driver script:
+
+```text
+scripts/run_fastq_to_bam.pbs
+```
+
+This follows the user's known cluster pattern:
+
+- Submit the main Nextflow process as a PBS job.
+- Use `cd "$PBS_O_WORKDIR"` so the job runs from the directory where `qsub` is called.
+- Activate the Conda environment with the explicit Miniconda path.
+- Load `singularity/4.2.1`.
+- Run the `hpc_singularity` profile.
+
+Submit from the Git repo root on the HPC:
+
+```bash
+cd /projects/sychen/projects/patnsb/medip/ebv-kd_medip/nf_medip_git
+qsub scripts/run_fastq_to_bam.pbs
+```
+
+Monitor:
+
+```bash
+qstat -u shangying
+tail -f logs/nf_medip_fastq_to_bam.out
+tail -f logs/nf_medip_fastq_to_bam.err
+```
+
+### First Runtime Fix
+
+The first PBS test failed during script compilation:
+
+```text
+Error main.nf:85:5: Entry workflow cannot have an emit section
+ERROR ~ Script compilation failed
+```
+
+Fix:
+
+- Removed the `emit:` block from the entry workflow in `main.nf`.
+- The BAM, BAI, and statistics outputs are still published through the module `publishDir` settings.
+
+After pulling the fix on HPC, rerun:
+
+```bash
+qsub scripts/run_fastq_to_bam.pbs
+```

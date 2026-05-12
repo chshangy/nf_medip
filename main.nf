@@ -81,13 +81,6 @@ workflow {
         .collect()
 
     MULTIQC(ch_multiqc_files)
-
-    emit:
-    bam      = BWA_MEM_SORT.out.bam
-    bai      = BWA_MEM_SORT.out.bai
-    flagstat = BWA_MEM_SORT.out.flagstat
-    idxstats = BWA_MEM_SORT.out.idxstats
-    stats    = BWA_MEM_SORT.out.stats
 }
 
 workflow.onComplete {
