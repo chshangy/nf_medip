@@ -1,0 +1,66 @@
+===== S1E11 selected samtools stats =====
+SN	raw total sequences:	34965545	# excluding supplementary and secondary reads
+SN	filtered sequences:	0
+SN	sequences:	34965545
+SN	reads mapped:	34965545
+SN	reads mapped and paired:	34940439	# paired-end technology bit set + both mates mapped
+SN	reads duplicated:	0	# PCR or optical duplicate bit set
+SN	error rate:	4.327650e-03	# mismatches / bases mapped (cigar)
+SN	average length:	107
+SN	insert size average:	122.5
+
+===== S1E12 selected samtools stats =====
+SN	raw total sequences:	24158875	# excluding supplementary and secondary reads
+SN	filtered sequences:	0
+SN	sequences:	24158875
+SN	reads mapped:	24158875
+SN	reads mapped and paired:	24141412	# paired-end technology bit set + both mates mapped
+SN	reads duplicated:	0	# PCR or optical duplicate bit set
+SN	error rate:	4.667350e-03	# mismatches / bases mapped (cigar)
+SN	average length:	109
+SN	insert size average:	127.9
+
+===== S1E13 selected samtools stats =====
+SN	raw total sequences:	29033221	# excluding supplementary and secondary reads
+SN	filtered sequences:	0
+SN	sequences:	29033221
+SN	reads mapped:	29033221
+SN	reads mapped and paired:	29012733	# paired-end technology bit set + both mates mapped
+SN	reads duplicated:	0	# PCR or optical duplicate bit set
+SN	error rate:	4.723284e-03	# mismatches / bases mapped (cigar)
+SN	average length:	113
+SN	insert size average:	133.4
+
+===== S1S21 selected samtools stats =====
+SN	raw total sequences:	35767084	# excluding supplementary and secondary reads
+SN	filtered sequences:	0
+SN	sequences:	35767084
+SN	reads mapped:	35767084
+SN	reads mapped and paired:	35743898	# paired-end technology bit set + both mates mapped
+SN	reads duplicated:	0	# PCR or optical duplicate bit set
+SN	error rate:	4.219768e-03	# mismatches / bases mapped (cigar)
+SN	average length:	104
+SN	insert size average:	117.2
+
+===== S1S22 selected samtools stats =====
+SN	raw total sequences:	31689164	# excluding supplementary and secondary reads
+SN	filtered sequences:	0
+SN	sequences:	31689164
+SN	reads mapped:	31689164
+SN	reads mapped and paired:	31666186	# paired-end technology bit set + both mates mapped
+SN	reads duplicated:	0	# PCR or optical duplicate bit set
+SN	error rate:	4.348344e-03	# mismatches / bases mapped (cigar)
+SN	average length:	104
+SN	insert size average:	115.7
+
+===== S1S23 selected samtools stats =====
+SN	raw total sequences:	31165810	# excluding supplementary and secondary reads
+SN	filtered sequences:	0
+SN	sequences:	31165810
+SN	reads mapped:	31165810
+SN	reads mapped and paired:	31144452	# paired-end technology bit set + both mates mapped
+SN	reads duplicated:	0	# PCR or optical duplicate bit set
+SN	error rate:	4.468603e-03	# mismatches / bases mapped (cigar)
+SN	average length:	110
+SN	insert size average:	132.3
+

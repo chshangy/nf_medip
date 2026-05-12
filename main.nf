@@ -7,6 +7,7 @@ include { FASTQC as FASTQC_RAW } from './modules/local/fastqc'
 include { FASTQC as FASTQC_TRIM } from './modules/local/fastqc'
 include { TRIMGALORE_PAIRED } from './modules/local/trim_galore'
 include { BWA_MEM_SORT } from './modules/local/bwa_mem_sort'
+include { SAMTOOLS_MARKDUP } from './modules/local/samtools_markdup'
 include { BAM_FILTER } from './modules/local/bam_filter'
 include { POST_ALIGNMENT_QC } from './modules/local/post_alignment_qc'
 include { BAM_COVERAGE } from './modules/local/bam_coverage'
@@ -65,7 +66,15 @@ workflow {
     }
 
     BWA_MEM_SORT(ch_reads_for_alignment, ch_fasta, ch_bwa_index)
-    BAM_FILTER(BWA_MEM_SORT.out.bam_bai)
+
+    if (params.skip_markduplicates) {
+        ch_bam_for_filter = BWA_MEM_SORT.out.bam_bai
+    } else {
+        SAMTOOLS_MARKDUP(BWA_MEM_SORT.out.bam_bai)
+        ch_bam_for_filter = SAMTOOLS_MARKDUP.out.bam_bai
+    }
+
+    BAM_FILTER(ch_bam_for_filter)
     POST_ALIGNMENT_QC(BAM_FILTER.out.bam_bai)
     BAM_COVERAGE(BAM_FILTER.out.bam_bai)
 
@@ -76,7 +85,14 @@ workflow {
         .mix(POST_ALIGNMENT_QC.out.flagstat.map { meta, file -> file })
         .mix(POST_ALIGNMENT_QC.out.idxstats.map { meta, file -> file })
         .mix(POST_ALIGNMENT_QC.out.stats.map { meta, file -> file })
-        .collect()
+
+    if (!params.skip_markduplicates) {
+        ch_multiqc_files = ch_multiqc_files
+            .mix(SAMTOOLS_MARKDUP.out.metrics.map { meta, file -> file })
+            .mix(SAMTOOLS_MARKDUP.out.flagstat.map { meta, file -> file })
+    }
+
+    ch_multiqc_files = ch_multiqc_files.collect()
 
     MULTIQC(ch_multiqc_files)
 }

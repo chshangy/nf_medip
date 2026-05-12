@@ -1,0 +1,38 @@
+Alignment BAMs
+--------------
+results/fastq_to_bam_test/alignment/S1E11.sorted.bam	2220989 KB
+results/fastq_to_bam_test/alignment/S1E11.sorted.bam.bai	2612 KB
+results/fastq_to_bam_test/alignment/S1E12.sorted.bam	1613481 KB
+results/fastq_to_bam_test/alignment/S1E12.sorted.bam.bai	2814 KB
+results/fastq_to_bam_test/alignment/S1E13.sorted.bam	1937179 KB
+results/fastq_to_bam_test/alignment/S1E13.sorted.bam.bai	2805 KB
+results/fastq_to_bam_test/alignment/S1S21.sorted.bam	2254448 KB
+results/fastq_to_bam_test/alignment/S1S21.sorted.bam.bai	2605 KB
+results/fastq_to_bam_test/alignment/S1S22.sorted.bam	2012488 KB
+results/fastq_to_bam_test/alignment/S1S22.sorted.bam.bai	2637 KB
+results/fastq_to_bam_test/alignment/S1S23.sorted.bam	2029007 KB
+results/fastq_to_bam_test/alignment/S1S23.sorted.bam.bai	2643 KB
+
+Filtered BAMs
+-------------
+results/fastq_to_bam_test/bam_filter/S1E11.filtered.bam	1693047 KB
+results/fastq_to_bam_test/bam_filter/S1E11.filtered.bam.bai	2590 KB
+results/fastq_to_bam_test/bam_filter/S1E12.filtered.bam	1224136 KB
+results/fastq_to_bam_test/bam_filter/S1E12.filtered.bam.bai	2775 KB
+results/fastq_to_bam_test/bam_filter/S1E13.filtered.bam	1453775 KB
+results/fastq_to_bam_test/bam_filter/S1E13.filtered.bam.bai	2773 KB
+results/fastq_to_bam_test/bam_filter/S1S21.filtered.bam	1716000 KB
+results/fastq_to_bam_test/bam_filter/S1S21.filtered.bam.bai	2583 KB
+results/fastq_to_bam_test/bam_filter/S1S22.filtered.bam	1525566 KB
+results/fastq_to_bam_test/bam_filter/S1S22.filtered.bam.bai	2609 KB
+results/fastq_to_bam_test/bam_filter/S1S23.filtered.bam	1547627 KB
+results/fastq_to_bam_test/bam_filter/S1S23.filtered.bam.bai	2622 KB
+
+Coverage files
+--------------
+results/fastq_to_bam_test/coverage/S1E11.filtered.bw	101719 KB
+results/fastq_to_bam_test/coverage/S1E12.filtered.bw	79974 KB
+results/fastq_to_bam_test/coverage/S1E13.filtered.bw	85077 KB
+results/fastq_to_bam_test/coverage/S1S21.filtered.bw	104096 KB
+results/fastq_to_bam_test/coverage/S1S22.filtered.bw	95845 KB
+results/fastq_to_bam_test/coverage/S1S23.filtered.bw	95899 KB

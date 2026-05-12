@@ -50,6 +50,9 @@ current_scripts/job_nf.pbs
   - `modules/local/bam_filter.nf`
   - `modules/local/post_alignment_qc.nf`
   - `modules/local/bam_coverage.nf`
+- Added optional duplicate marking with `samtools markdup`:
+  - `modules/local/samtools_markdup.nf`
+- Successfully tested the current workflow on the HPC with PBS Pro and Singularity.
 - Started downstream design for user-selectable QSEA and MEDIPS analysis.
 
 ## HPC Environment Status
@@ -108,6 +111,47 @@ Before the full run, validate config parsing:
 nextflow config -profile hpc_singularity
 ```
 
+## Latest Successful HPC Test
+
+The pipeline ran successfully on 2026-05-12.
+
+Completed stages:
+
+```text
+FASTQC_RAW
+TRIMGALORE_PAIRED
+FASTQC_TRIM
+BWA_MEM_SORT
+SAMTOOLS_MARKDUP
+BAM_FILTER
+POST_ALIGNMENT_QC
+BAM_COVERAGE
+MULTIQC
+```
+
+HPC summary:
+
+```text
+Completed at: 12-May-2026 14:50:27
+Duration    : 3m 7s
+CPU hours   : 41.2 (98.3% cached)
+Succeeded   : 7
+Cached      : 36
+```
+
+Expected result directories:
+
+```text
+results/fastq_to_bam_test/fastqc/
+results/fastq_to_bam_test/trim_galore/
+results/fastq_to_bam_test/alignment/
+results/fastq_to_bam_test/bam_filter/
+results/fastq_to_bam_test/post_alignment_qc/
+results/fastq_to_bam_test/coverage/
+results/fastq_to_bam_test/multiqc/
+results/fastq_to_bam_test/pipeline_info/
+```
+
 ## Known Issues / Next Things To Check
 
 - `test_data/samplesheet.csv` in the local Windows workspace was locked by another process, so it could not be overwritten.
@@ -156,10 +200,11 @@ If the container does not include `samtools`, the HPC run may fail at alignment.
 
 ## Immediate Next Step After Restart
 
-1. Wait for the FASTQ-to-BAM PBS test to finish.
-2. Inspect `logs/nf_medip_fastq_to_bam.out`, `logs/nf_medip_fastq_to_bam.err`, and `.nextflow.log`.
-3. Fix any container/runtime issues from the FASTQ-to-BAM test.
-4. Add downstream workflow modules for QSEA and MEDIPS.
+1. Test the new optional duplicate-marking stage.
+2. Inspect duplicate metrics from `results/fastq_to_bam_test/markdup/`.
+3. Confirm filtered BAMs are now generated from marked BAMs.
+4. Decide region strategy for downstream quantification: fixed windows, CpG islands, promoters, or custom BED.
+5. Add downstream workflow modules for QSEA and MEDIPS.
 
 ## Downstream Analysis Direction
 

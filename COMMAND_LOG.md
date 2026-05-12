@@ -668,6 +668,64 @@ The bundle includes:
 
 The bundle intentionally excludes large FASTQ, BAM, BAI, bigWig, and container image files.
 
+## 2026-05-12: Optional Duplicate Marking
+
+Added optional duplicate marking with `samtools markdup`.
+
+New module:
+
+```text
+modules/local/samtools_markdup.nf
+```
+
+Updated workflow:
+
+```text
+BWA_MEM_SORT
+  -> SAMTOOLS_MARKDUP, unless --skip_markduplicates true
+  -> BAM_FILTER
+  -> POST_ALIGNMENT_QC
+  -> BAM_COVERAGE
+```
+
+New parameter:
+
+```text
+--skip_markduplicates false
+```
+
+Existing parameter behavior:
+
+```text
+--remove_duplicates false
+```
+
+Meaning:
+
+- By default, duplicates are marked and duplicate metrics are produced.
+- By default, duplicates are not removed from the filtered BAM.
+- If `--remove_duplicates true`, `BAM_FILTER` excludes reads with duplicate flag `1024`.
+
+The module runs:
+
+```text
+samtools sort -n
+samtools fixmate -m
+samtools sort
+samtools markdup -s -f metrics
+samtools index
+samtools flagstat
+```
+
+Expected outputs:
+
+```text
+results/fastq_to_bam_test/markdup/*.markdup.bam
+results/fastq_to_bam_test/markdup/*.markdup.bam.bai
+results/fastq_to_bam_test/markdup/*.markdup.metrics.txt
+results/fastq_to_bam_test/markdup/*.markdup.flagstat.txt
+```
+
 
 ### Second Runtime Fix
 

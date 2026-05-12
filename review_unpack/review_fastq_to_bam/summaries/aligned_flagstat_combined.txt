@@ -1,0 +1,108 @@
+===== S1E11 raw aligned flagstat =====
+45369193 + 0 in total (QC-passed reads + QC-failed reads)
+44743612 + 0 primary
+0 + 0 secondary
+625581 + 0 supplementary
+0 + 0 duplicates
+0 + 0 primary duplicates
+45198695 + 0 mapped (99.62% : N/A)
+44573114 + 0 primary mapped (99.62% : N/A)
+44743612 + 0 paired in sequencing
+22371806 + 0 read1
+22371806 + 0 read2
+43689704 + 0 properly paired (97.64% : N/A)
+44531860 + 0 with itself and mate mapped
+41254 + 0 singletons (0.09% : N/A)
+696402 + 0 with mate mapped to a different chr
+345907 + 0 with mate mapped to a different chr (mapQ>=5)
+
+===== S1E12 raw aligned flagstat =====
+31494697 + 0 in total (QC-passed reads + QC-failed reads)
+31005196 + 0 primary
+0 + 0 secondary
+489501 + 0 supplementary
+0 + 0 duplicates
+0 + 0 primary duplicates
+31369969 + 0 mapped (99.60% : N/A)
+30880468 + 0 primary mapped (99.60% : N/A)
+31005196 + 0 paired in sequencing
+15502598 + 0 read1
+15502598 + 0 read2
+30137018 + 0 properly paired (97.20% : N/A)
+30851074 + 0 with itself and mate mapped
+29394 + 0 singletons (0.09% : N/A)
+588338 + 0 with mate mapped to a different chr
+291894 + 0 with mate mapped to a different chr (mapQ>=5)
+
+===== S1E13 raw aligned flagstat =====
+37943954 + 0 in total (QC-passed reads + QC-failed reads)
+37174636 + 0 primary
+0 + 0 secondary
+769318 + 0 supplementary
+0 + 0 duplicates
+0 + 0 primary duplicates
+37818237 + 0 mapped (99.67% : N/A)
+37048919 + 0 primary mapped (99.66% : N/A)
+37174636 + 0 paired in sequencing
+18587318 + 0 read1
+18587318 + 0 read2
+35950156 + 0 properly paired (96.71% : N/A)
+37016380 + 0 with itself and mate mapped
+32539 + 0 singletons (0.09% : N/A)
+866036 + 0 with mate mapped to a different chr
+463718 + 0 with mate mapped to a different chr (mapQ>=5)
+
+===== S1S21 raw aligned flagstat =====
+46460222 + 0 in total (QC-passed reads + QC-failed reads)
+45725738 + 0 primary
+0 + 0 secondary
+734484 + 0 supplementary
+0 + 0 duplicates
+0 + 0 primary duplicates
+46276409 + 0 mapped (99.60% : N/A)
+45541925 + 0 primary mapped (99.60% : N/A)
+45725738 + 0 paired in sequencing
+22862869 + 0 read1
+22862869 + 0 read2
+44554406 + 0 properly paired (97.44% : N/A)
+45503088 + 0 with itself and mate mapped
+38837 + 0 singletons (0.08% : N/A)
+786858 + 0 with mate mapped to a different chr
+424767 + 0 with mate mapped to a different chr (mapQ>=5)
+
+===== S1S22 raw aligned flagstat =====
+41286787 + 0 in total (QC-passed reads + QC-failed reads)
+40647982 + 0 primary
+0 + 0 secondary
+638805 + 0 supplementary
+0 + 0 duplicates
+0 + 0 primary duplicates
+41077660 + 0 mapped (99.49% : N/A)
+40438855 + 0 primary mapped (99.49% : N/A)
+40647982 + 0 paired in sequencing
+20323991 + 0 read1
+20323991 + 0 read2
+39593554 + 0 properly paired (97.41% : N/A)
+40399230 + 0 with itself and mate mapped
+39625 + 0 singletons (0.10% : N/A)
+658014 + 0 with mate mapped to a different chr
+329933 + 0 with mate mapped to a different chr (mapQ>=5)
+
+===== S1S23 raw aligned flagstat =====
+40271305 + 0 in total (QC-passed reads + QC-failed reads)
+39645656 + 0 primary
+0 + 0 secondary
+625649 + 0 supplementary
+0 + 0 duplicates
+0 + 0 primary duplicates
+40105356 + 0 mapped (99.59% : N/A)
+39479707 + 0 primary mapped (99.58% : N/A)
+39645656 + 0 paired in sequencing
+19822828 + 0 read1
+19822828 + 0 read2
+38504712 + 0 properly paired (97.12% : N/A)
+39444002 + 0 with itself and mate mapped
+35705 + 0 singletons (0.09% : N/A)
+760808 + 0 with mate mapped to a different chr
+389594 + 0 with mate mapped to a different chr (mapQ>=5)
+

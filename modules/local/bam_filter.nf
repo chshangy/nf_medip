@@ -27,4 +27,3 @@ process BAM_FILTER {
     samtools index -@ ${task.cpus} ${meta.id}.filtered.bam
     """
 }
-

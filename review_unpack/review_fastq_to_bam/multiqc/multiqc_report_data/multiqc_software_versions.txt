@@ -1,0 +1,4 @@
+Sample	Samtools	HTSlib	Cutadapt	FastQC
+Cutadapt			4.2	
+FastQC				0.12.1
+Samtools	1.16.1, 1.20	1.16		
