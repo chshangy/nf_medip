@@ -2,10 +2,14 @@
 
 nextflow.enable.dsl = 2
 
+include { INPUT_CHECK } from './subworkflows/local/input_check'
 include { FASTQC as FASTQC_RAW } from './modules/local/fastqc'
 include { FASTQC as FASTQC_TRIM } from './modules/local/fastqc'
 include { TRIMGALORE_PAIRED } from './modules/local/trim_galore'
 include { BWA_MEM_SORT } from './modules/local/bwa_mem_sort'
+include { BAM_FILTER } from './modules/local/bam_filter'
+include { POST_ALIGNMENT_QC } from './modules/local/post_alignment_qc'
+include { BAM_COVERAGE } from './modules/local/bam_coverage'
 include { MULTIQC } from './modules/local/multiqc'
 
 /*
@@ -28,26 +32,8 @@ workflow {
         error "Please provide the BWA-indexed reference FASTA with --fasta"
     }
 
-    ch_reads = Channel
-        .fromPath(params.input, checkIfExists: true)
-        .splitCsv(header: true)
-        .map { row ->
-            def meta = [
-                id          : row.sample,
-                single_end  : false,
-                strandedness: row.strandedness ?: 'auto',
-                group       : row.group ?: 'NA'
-            ]
-
-            if (!row.sample) {
-                error "Samplesheet row is missing 'sample'"
-            }
-            if (!row.fastq_1 || !row.fastq_2) {
-                error "Sample '${row.sample}' is missing fastq_1 or fastq_2"
-            }
-
-            tuple(meta, [ file(row.fastq_1, checkIfExists: true), file(row.fastq_2, checkIfExists: true) ])
-        }
+    INPUT_CHECK(params.input)
+    ch_reads = INPUT_CHECK.out.reads
 
     ch_fasta = Channel.value(file(params.fasta, checkIfExists: true))
     ch_bwa_index = Channel.value([
@@ -79,11 +65,17 @@ workflow {
     }
 
     BWA_MEM_SORT(ch_reads_for_alignment, ch_fasta, ch_bwa_index)
+    BAM_FILTER(BWA_MEM_SORT.out.bam_bai)
+    POST_ALIGNMENT_QC(BAM_FILTER.out.bam_bai)
+    BAM_COVERAGE(BAM_FILTER.out.bam_bai)
 
     ch_multiqc_files = ch_multiqc_files
         .mix(BWA_MEM_SORT.out.flagstat.map { meta, file -> file })
         .mix(BWA_MEM_SORT.out.idxstats.map { meta, file -> file })
         .mix(BWA_MEM_SORT.out.stats.map { meta, file -> file })
+        .mix(POST_ALIGNMENT_QC.out.flagstat.map { meta, file -> file })
+        .mix(POST_ALIGNMENT_QC.out.idxstats.map { meta, file -> file })
+        .mix(POST_ALIGNMENT_QC.out.stats.map { meta, file -> file })
         .collect()
 
     MULTIQC(ch_multiqc_files)

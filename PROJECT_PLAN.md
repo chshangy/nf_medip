@@ -21,6 +21,7 @@ The pipeline should support:
 - Region-level methylation signal quantification.
 - Normalized methylation enrichment matrices.
 - Optional beta-like matrices, clearly documented as enrichment-derived estimates rather than true bisulfite-style beta values.
+- User-selectable downstream analysis with QSEA or MEDIPS.
 - Group-wise DMR analysis.
 - Annotation and reporting of DMRs.
 
@@ -335,11 +336,23 @@ results/matrix/
 
 ### 7.10 DMR Analysis
 
-Recommended first implementation:
+Recommended downstream implementations:
 
+- QSEA.
 - MEDIPS.
 
-MEDIPS is designed for MeDIP-seq and related DNA immunoprecipitation sequencing data. It supports MeDIP-specific quality control and differential coverage analysis.
+QSEA should be the preferred default for downstream beta-like methylation matrix generation because it was developed as a successor to MEDIPS for MeDIP-seq and can model enrichment data into methylation-like values while also supporting DMR analysis.
+
+MEDIPS should remain available because it is a well-known MeDIP-seq analysis package and provides MeDIP-specific quality control and differential coverage analysis.
+
+The pipeline should allow users to choose the downstream method:
+
+```text
+--methylation_method qsea
+--methylation_method medips
+--dmr_method qsea
+--dmr_method medips
+```
 
 Future optional methods:
 
@@ -479,11 +492,20 @@ Initial parameter set:
 --promoter_bed
 --normalize_using
 --matrix_type
+--methylation_method
 --contrast
 --dmr_method
+--dmr_methods
 --fdr
 --min_abs_log2fc
 --min_cpgs
+--qsea_window_size
+--qsea_fragment_size
+--qsea_enrichment_pattern
+--qsea_norm_method
+--medips_window_size
+--medips_extend
+--medips_shift
 ```
 
 ## 10. Implementation Milestones
@@ -529,9 +551,12 @@ Initial parameter set:
 - Generate raw count and normalized enrichment matrices.
 - Add optional beta-like matrix generation with careful documentation.
 
-### Milestone 6: DMR Analysis
+### Milestone 6: Methylation Matrix and DMR Analysis
 
-- Add MEDIPS-based DMR analysis.
+- Add QSEA-based beta-like methylation matrix generation.
+- Add QSEA-based DMR analysis.
+- Add MEDIPS-based enrichment matrix and DMR analysis.
+- Add parameter-based method selection.
 - Support pairwise contrasts.
 - Generate DMR tables and BED files.
 - Add summary plots.
@@ -656,7 +681,8 @@ Open technical decisions:
 - Whether BWA-MEM2 or Bowtie2 should be the default aligner.
 - Whether duplicate reads should be removed by default.
 - Which region mode should be the default: fixed windows, CpG islands, or user BED.
-- Whether MEDIPS alone is sufficient for the first DMR implementation.
+- Whether QSEA should be the default method for both beta-like matrix generation and DMR analysis.
+- Whether MEDIPS should be provided as a parallel method from the first downstream release or added after QSEA.
 - Whether input-control libraries should be supported in the first release.
 - How to define beta-like values in a scientifically conservative way.
 
@@ -665,7 +691,8 @@ Recommended initial defaults:
 - Default aligner: BWA-MEM2.
 - Default region mode: fixed windows.
 - Default window size: 500 bp.
-- Default DMR method: MEDIPS.
+- Default methylation method: QSEA.
+- Default DMR method: QSEA.
 - Default duplicate handling: mark duplicates and allow optional removal.
 - Default matrix output: raw counts and normalized enrichment, not beta-like values.
 
@@ -684,4 +711,3 @@ The first useful version should be considered complete when it can:
 - Pass the test profile.
 - Pass nf-core linting with no critical errors.
 - Provide clear usage and output documentation.
-

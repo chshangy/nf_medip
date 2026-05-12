@@ -45,6 +45,12 @@ current_scripts/job_nf.pbs
   - `modules/local/trim_galore.nf`
   - `modules/local/bwa_mem_sort.nf`
   - `modules/local/multiqc.nf`
+- Added the next pre-downstream workflow stages:
+  - `subworkflows/local/input_check.nf`
+  - `modules/local/bam_filter.nf`
+  - `modules/local/post_alignment_qc.nf`
+  - `modules/local/bam_coverage.nf`
+- Started downstream design for user-selectable QSEA and MEDIPS analysis.
 
 ## HPC Environment Status
 
@@ -150,10 +156,36 @@ If the container does not include `samtools`, the HPC run may fail at alignment.
 
 ## Immediate Next Step After Restart
 
-1. Confirm Git for Windows is installed and available in PowerShell.
-2. Add a `.gitignore`.
-3. Initialize Git and push to the GitHub `nf_medip` repo.
-4. Pull/clone on HPC.
-5. Run `nextflow config -profile hpc_singularity`.
-6. Run the FASTQ-to-BAM test.
+1. Wait for the FASTQ-to-BAM PBS test to finish.
+2. Inspect `logs/nf_medip_fastq_to_bam.out`, `logs/nf_medip_fastq_to_bam.err`, and `.nextflow.log`.
+3. Fix any container/runtime issues from the FASTQ-to-BAM test.
+4. Add downstream workflow modules for QSEA and MEDIPS.
 
+## Downstream Analysis Direction
+
+The downstream methylation matrix and DMR workflow should start after the filtered BAM and coverage stage, and should support both:
+
+- QSEA.
+- MEDIPS.
+
+Planned user-facing method parameters:
+
+```text
+--methylation_method qsea
+--methylation_method medips
+--dmr_method qsea
+--dmr_method medips
+```
+
+Recommended default:
+
+```text
+--methylation_method qsea
+--dmr_method qsea
+```
+
+Rationale:
+
+- QSEA is designed for MeDIP-seq/IP-seq data analysis and is described by Bioconductor as a successor to MEDIPS.
+- QSEA can generate methylation-like beta estimates from MeDIP-seq enrichment data.
+- MEDIPS remains useful as a known MeDIP-seq method and should be available as an alternative.

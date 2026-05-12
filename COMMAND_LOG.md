@@ -512,6 +512,69 @@ ${params.fasta}.sa
 
 - Updated `BWA_MEM_SORT` to use the staged FASTA basename in the work directory.
 
+## 2026-05-12: Added Pre-downstream Workflow Stages
+
+Added the next planned workflow stages before region quantification and DMR analysis:
+
+```text
+INPUT_CHECK
+BAM_FILTER
+POST_ALIGNMENT_QC
+COVERAGE_SIGNAL
+```
+
+New files:
+
+```text
+subworkflows/local/input_check.nf
+modules/local/bam_filter.nf
+modules/local/post_alignment_qc.nf
+modules/local/bam_coverage.nf
+```
+
+Updated files:
+
+```text
+main.nf
+modules/local/bwa_mem_sort.nf
+nextflow.config
+PROGRESS.md
+COMMAND_LOG.md
+```
+
+Current workflow:
+
+```text
+INPUT_CHECK
+  -> FASTQC_RAW
+  -> TRIMGALORE_PAIRED
+  -> FASTQC_TRIM
+  -> BWA_MEM_SORT
+  -> BAM_FILTER
+  -> POST_ALIGNMENT_QC
+  -> BAM_COVERAGE
+  -> MULTIQC
+```
+
+Filtering defaults:
+
+```text
+--min_mapq 30
+--samtools_exclude_flags 2820
+--remove_duplicates false
+```
+
+The default exclude flags remove unmapped, secondary, QC-failed, and supplementary reads. Duplicate removal remains optional because duplicate handling in MeDIP-seq can be analysis-dependent.
+
+Coverage defaults:
+
+```text
+--coverage_bin_size 50
+--coverage_normalize_using CPM
+--effective_genome_size null
+```
+
+
 ### Second Runtime Fix
 
 The next run failed under Nextflow 26.04.0 with:

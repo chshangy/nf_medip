@@ -13,6 +13,7 @@ process BWA_MEM_SORT {
     path bwa_index
 
     output:
+    tuple val(meta), path("${meta.id}.sorted.bam"), path("${meta.id}.sorted.bam.bai"), emit: bam_bai
     tuple val(meta), path("${meta.id}.sorted.bam"),     emit: bam
     tuple val(meta), path("${meta.id}.sorted.bam.bai"), emit: bai
     tuple val(meta), path("${meta.id}.flagstat.txt"),   emit: flagstat
