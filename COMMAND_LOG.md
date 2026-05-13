@@ -899,6 +899,46 @@ Submit from the HPC repo root:
 qsub scripts/run_qsea_test.pbs
 ```
 
+## 2026-05-13: QSEA PBS Resource Submission Fix
+
+The first QSEA test reached the `QSEA_CREATE_DMR` process, but PBS rejected the job before execution:
+
+```text
+qsub: Job violates queue and/or server resource limits
+```
+
+The rejected process was using the initial QSEA label resources:
+
+```text
+cpus = 8
+memory = 64 GB
+time = 72h
+queue = long
+```
+
+Fix:
+
+- Reduced QSEA process memory to 40 GB.
+- Reduced QSEA process walltime to 48 hours.
+- Routed QSEA-labeled processes to the `large` queue in the HPC profile.
+
+Updated QSEA resources:
+
+```text
+withLabel: qsea {
+  cpus = 8
+  memory = 40.GB
+  time = 48.h
+  queue = 'large'
+}
+```
+
+Rerun after pushing/pulling:
+
+```bash
+qsub scripts/run_qsea_test.pbs
+```
+
 
 ### Second Runtime Fix
 
