@@ -13,20 +13,21 @@ process QSEA_CREATE_DMR {
 
     output:
     path "qsea_sample_table.tsv", emit: sample_table
-    path "qsea/qseaSet.RData", emit: qsea_set
-    path "qsea/qseaSet_blind.RData", emit: qsea_set_blind
-    path "qsea/qsea_glm.RData", emit: qsea_glm
-    path "qsea/qsea_summary.txt", emit: summary
-    path "qsea/qsea_all_regions.tsv", emit: all_regions
-    path "qsea/qsea_region_stats.tsv", emit: region_stats
-    path "qsea/qsea_beta_matrix.tsv", emit: beta_matrix
-    path "qsea/qsea_counts_matrix.tsv", emit: counts_matrix
-    path "qsea/qsea_region_annotation.tsv", emit: region_annotation
-    path "qsea/qsea_dmr_significant.tsv", emit: dmr_significant
-    path "qsea/qsea_dmr_filtered.tsv", emit: dmr_filtered
-    path "qsea/qsea_dmr_filtered.bed", emit: dmr_bed
-    path "qsea/qsea_design_matrix.tsv", emit: design
-    path "qsea/qsea_run.log", emit: log
+    path "qsea_sample_table.used.tsv", emit: sample_table_used
+    path "qseaSet.RData", emit: qsea_set
+    path "qseaSet_blind.RData", emit: qsea_set_blind
+    path "qsea_glm.RData", emit: qsea_glm
+    path "qsea_summary.txt", emit: summary
+    path "qsea_all_regions.tsv", emit: all_regions
+    path "qsea_region_stats.tsv", emit: region_stats
+    path "qsea_beta_matrix.tsv", emit: beta_matrix
+    path "qsea_counts_matrix.tsv", emit: counts_matrix
+    path "qsea_region_annotation.tsv", emit: region_annotation
+    path "qsea_dmr_significant.tsv", emit: dmr_significant
+    path "qsea_dmr_filtered.tsv", emit: dmr_filtered
+    path "qsea_dmr_filtered.bed", emit: dmr_bed
+    path "qsea_design_matrix.tsv", emit: design
+    path "qsea_run.log", emit: log
 
     script:
     def rows = sample_records.collect { rec ->
@@ -38,11 +39,9 @@ sample_name\tfile_name\tgroup\tsamples\tbatch
 ${rows}
 EOF
 
-    mkdir -p qsea
-
     Rscript ${qsea_script} \\
         --sample_table qsea_sample_table.tsv \\
-        --outdir qsea \\
+        --outdir . \\
         --bsgenome ${params.qsea_bsgenome} \\
         --contrast ${params.contrast} \\
         --chr_select ${params.qsea_chr_select} \\

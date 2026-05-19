@@ -1311,3 +1311,40 @@ Fix:
 
 - Removed the `workflow.onComplete` callback from `main.nf`.
 - Nextflow still records completion status in the standard log/report outputs.
+
+## 2026-05-19: QSEA Review Archive Collection Fix
+
+Observed locally after downloading `review_qsea.tar.gz`:
+
+```bash
+tar -tzf review_qsea.tar.gz
+```
+
+Result:
+
+```text
+review_qsea/
+review_qsea/qsea/
+review_qsea/logs/
+review_qsea/logs/nf_medip_qsea.err
+review_qsea/logs/nextflow_tail_300.log
+tar.exe: Damaged tar archive (bad header checksum)
+tar.exe: Truncated tar archive detected while reading next header
+```
+
+Fix:
+
+- Updated `scripts/collect_qsea_review.sh` to locate the real QSEA output directory by checking for `qsea_summary.txt`.
+- This supports both `results/.../qsea/qsea_summary.txt` and `results/.../qsea/qsea/qsea_summary.txt`.
+- Added `gzip -t "${ARCHIVE}"` so archive corruption is detected before download.
+- Updated `modules/local/qsea_create_dmr.nf` so QSEA writes outputs to the process root with `--outdir .`. This makes `publishDir "${params.outdir}/qsea"` publish the final QSEA files directly under `results/.../qsea/` rather than preserving a nested `qsea/` subdirectory.
+
+Recommended rerun on HPC:
+
+```bash
+qsub scripts/run_qsea_test.pbs
+bash scripts/collect_qsea_review.sh results/fastq_to_bam_test review_qsea_light
+gzip -t review_qsea_light.tar.gz
+tar -tzf review_qsea_light.tar.gz | head -50
+ls -lh review_qsea_light.tar.gz
+```

@@ -414,3 +414,37 @@ qsea_region_annotation.tsv
 ```
 
 All tables use `region_id` so users can join region statistics, beta-like methylation values, counts, and ChIPseeker gene annotation.
+
+## QSEA Review Bundle Follow-Up
+
+The first downloaded `review_qsea.tar.gz` archive was incomplete/corrupted after transfer. It only listed logs and an empty `qsea/` directory before `tar` reported a damaged/truncated archive.
+
+Likely cause:
+
+- The collection script expected QSEA files directly under `results/fastq_to_bam_test/qsea`.
+- The Nextflow process publishes a `qsea/` output folder, so the real files may be under `results/fastq_to_bam_test/qsea/qsea`.
+
+Fix added:
+
+- `scripts/collect_qsea_review.sh` now detects the actual QSEA output directory by searching for `qsea_summary.txt`.
+- The script validates the archive with `gzip -t` immediately after creating it.
+- `modules/local/qsea_create_dmr.nf` now writes QSEA outputs directly in the process working directory, so `publishDir` copies the final files directly to `results/.../qsea/` instead of publishing a nested `qsea/qsea/` folder.
+
+Next HPC command after pulling the update:
+
+```bash
+bash scripts/collect_qsea_review.sh results/fastq_to_bam_test review_qsea_light
+gzip -t review_qsea_light.tar.gz
+tar -tzf review_qsea_light.tar.gz | head -50
+```
+
+If those checks pass on the HPC, download `review_qsea_light.tar.gz` and upload it for local inspection.
+
+Expected archive contents should now include:
+
+```text
+review_qsea_light/qsea/qsea_summary.txt
+review_qsea_light/qsea/qsea_dmr_filtered.tsv
+review_qsea_light/qsea/qsea_dmr_significant.tsv
+review_qsea_light/qsea/qsea_sample_table.used.tsv
+```

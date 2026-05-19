@@ -5,11 +5,24 @@ set -euo pipefail
 OUTDIR="${1:-results/fastq_to_bam_test}"
 REVIEW_DIR="${2:-review_qsea}"
 ARCHIVE="${REVIEW_DIR}.tar.gz"
-QSEA_DIR="${OUTDIR}/qsea"
+QSEA_ROOT="${OUTDIR}/qsea"
 FULL_TABLES="${FULL_TABLES:-0}"
 
-if [[ ! -d "${QSEA_DIR}" ]]; then
-    echo "ERROR: QSEA directory not found: ${QSEA_DIR}" >&2
+if [[ -f "${QSEA_ROOT}/qsea_summary.txt" ]]; then
+    QSEA_DIR="${QSEA_ROOT}"
+elif [[ -f "${QSEA_ROOT}/qsea/qsea_summary.txt" ]]; then
+    QSEA_DIR="${QSEA_ROOT}/qsea"
+else
+    QSEA_SUMMARY="$(find "${QSEA_ROOT}" -mindepth 1 -maxdepth 3 -type f -name qsea_summary.txt -print -quit 2>/dev/null || true)"
+    if [[ -n "${QSEA_SUMMARY}" ]]; then
+        QSEA_DIR="$(dirname "${QSEA_SUMMARY}")"
+    else
+        QSEA_DIR=""
+    fi
+fi
+
+if [[ -z "${QSEA_DIR:-}" || ! -d "${QSEA_DIR}" ]]; then
+    echo "ERROR: QSEA output directory with qsea_summary.txt not found under: ${QSEA_ROOT}" >&2
     echo "Usage: bash scripts/collect_qsea_review.sh [outdir] [review_dir]" >&2
     exit 1
 fi
@@ -106,6 +119,8 @@ if [[ -d "logs" ]]; then
 fi
 
 tar -czf "${ARCHIVE}" "${REVIEW_DIR}"
+
+gzip -t "${ARCHIVE}"
 
 echo "QSEA review bundle created:"
 echo "  ${ARCHIVE}"
