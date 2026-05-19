@@ -25,6 +25,7 @@ process QSEA_CREATE_DMR {
     path "qsea_region_annotation.tsv", emit: region_annotation
     path "qsea_dmr_significant.tsv", emit: dmr_significant
     path "qsea_dmr_filtered.tsv", emit: dmr_filtered
+    path "qsea_dmr_filtered_annotated.tsv", emit: dmr_filtered_annotated
     path "qsea_dmr_filtered.bed", emit: dmr_bed
     path "qsea_design_matrix.tsv", emit: design
     path "qsea_run.log", emit: log

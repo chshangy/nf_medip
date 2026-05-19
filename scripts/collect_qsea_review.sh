@@ -45,6 +45,7 @@ for file in \
     qsea_design_matrix.tsv \
     qsea_dmr_significant.tsv \
     qsea_dmr_filtered.tsv \
+    qsea_dmr_filtered_annotated.tsv \
     qsea_dmr_filtered.bed \
     qsea_run.log
 do
@@ -76,7 +77,7 @@ fi
 {
     echo "QSEA table dimensions"
     echo "---------------------"
-    for file in qsea_region_stats.tsv qsea_beta_matrix.tsv qsea_counts_matrix.tsv qsea_region_annotation.tsv qsea_dmr_significant.tsv qsea_dmr_filtered.tsv; do
+    for file in qsea_region_stats.tsv qsea_beta_matrix.tsv qsea_counts_matrix.tsv qsea_region_annotation.tsv qsea_dmr_significant.tsv qsea_dmr_filtered.tsv qsea_dmr_filtered_annotated.tsv; do
         if [[ -f "${QSEA_DIR}/${file}" ]]; then
             rows=$(($(wc -l < "${QSEA_DIR}/${file}") - 1))
             cols=$(awk -F '\t' 'NR==1 {print NF}' "${QSEA_DIR}/${file}")
@@ -88,7 +89,7 @@ fi
 {
     echo "QSEA table previews"
     echo "-------------------"
-    for file in qsea_summary.txt qsea_region_stats.tsv qsea_beta_matrix.tsv qsea_counts_matrix.tsv qsea_region_annotation.tsv qsea_dmr_filtered.tsv; do
+    for file in qsea_summary.txt qsea_region_stats.tsv qsea_beta_matrix.tsv qsea_counts_matrix.tsv qsea_region_annotation.tsv qsea_dmr_filtered.tsv qsea_dmr_filtered_annotated.tsv; do
         if [[ -f "${QSEA_DIR}/${file}" ]]; then
             echo
             echo "===== ${file} ====="
@@ -100,7 +101,7 @@ fi
 {
     echo "QSEA headers"
     echo "------------"
-    for file in qsea_region_stats.tsv qsea_beta_matrix.tsv qsea_counts_matrix.tsv qsea_region_annotation.tsv qsea_all_regions.tsv qsea_dmr_filtered.tsv; do
+    for file in qsea_region_stats.tsv qsea_beta_matrix.tsv qsea_counts_matrix.tsv qsea_region_annotation.tsv qsea_all_regions.tsv qsea_dmr_filtered.tsv qsea_dmr_filtered_annotated.tsv; do
         if [[ -f "${QSEA_DIR}/${file}" ]]; then
             echo
             echo "===== ${file} ====="

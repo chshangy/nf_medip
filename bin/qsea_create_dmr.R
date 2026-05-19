@@ -462,6 +462,37 @@ write.table(
     row.names = FALSE
 )
 
+annotation_extra_cols <- setdiff(names(annotation_table), names(result_dmr))
+result_dmr_annotated <- result_dmr
+
+if (nrow(result_dmr) > 0 && "region_id" %in% names(result_dmr) && "region_id" %in% names(annotation_table)) {
+    annotation_extra <- annotation_table[, c("region_id", annotation_extra_cols), drop = FALSE]
+    result_dmr_annotated <- merge(
+        result_dmr,
+        annotation_extra,
+        by = "region_id",
+        all.x = TRUE,
+        sort = FALSE
+    )
+    result_dmr_annotated <- result_dmr_annotated[
+        match(result_dmr$region_id, result_dmr_annotated$region_id),
+        c(names(result_dmr), annotation_extra_cols),
+        drop = FALSE
+    ]
+} else {
+    for (col in annotation_extra_cols) {
+        result_dmr_annotated[[col]] <- rep(NA_character_, nrow(result_dmr_annotated))
+    }
+}
+
+write.table(
+    result_dmr_annotated,
+    file.path(outdir, "qsea_dmr_filtered_annotated.tsv"),
+    sep = "\t",
+    quote = FALSE,
+    row.names = FALSE
+)
+
 bed <- data.frame()
 if (nrow(result_dmr) > 0 && all(c("chr", "window_start", "window_end") %in% names(result_dmr))) {
     bed <- data.frame(

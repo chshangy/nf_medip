@@ -411,9 +411,10 @@ qsea_region_stats.tsv
 qsea_beta_matrix.tsv
 qsea_counts_matrix.tsv
 qsea_region_annotation.tsv
+qsea_dmr_filtered_annotated.tsv
 ```
 
-All tables use `region_id` so users can join region statistics, beta-like methylation values, counts, and ChIPseeker gene annotation.
+All tables use `region_id` so users can join region statistics, beta-like methylation values, counts, and ChIPseeker gene annotation. The filtered DMR table is also exported in an annotation-joined form for immediate downstream interpretation.
 
 ## QSEA Review Bundle Follow-Up
 
@@ -445,6 +446,7 @@ Expected archive contents should now include:
 ```text
 review_qsea_light/qsea/qsea_summary.txt
 review_qsea_light/qsea/qsea_dmr_filtered.tsv
+review_qsea_light/qsea/qsea_dmr_filtered_annotated.tsv
 review_qsea_light/qsea/qsea_dmr_significant.tsv
 review_qsea_light/qsea/qsea_sample_table.used.tsv
 ```
