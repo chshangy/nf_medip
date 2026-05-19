@@ -972,7 +972,23 @@ The script creates:
 review_qsea.tar.gz
 ```
 
-It includes table dimensions, previews, QSEA output tables, QSEA logs, Nextflow log tail, and PBS logs, but excludes large RData files by default.
+It includes table dimensions, headers, previews, DMR tables, QSEA logs, Nextflow log tail, and PBS logs.
+
+After QSEA produced millions of windows, the script was updated to exclude large all-region tables by default:
+
+```text
+qsea_region_stats.tsv
+qsea_beta_matrix.tsv
+qsea_counts_matrix.tsv
+qsea_region_annotation.tsv
+qsea_all_regions.tsv
+```
+
+To include full large tables:
+
+```bash
+FULL_TABLES=1 bash scripts/collect_qsea_review.sh results/fastq_to_bam_test review_qsea_full
+```
 
 ## 2026-05-13: QSEA PBS Resource Submission Fix
 

@@ -6,6 +6,7 @@ OUTDIR="${1:-results/fastq_to_bam_test}"
 REVIEW_DIR="${2:-review_qsea}"
 ARCHIVE="${REVIEW_DIR}.tar.gz"
 QSEA_DIR="${OUTDIR}/qsea"
+FULL_TABLES="${FULL_TABLES:-0}"
 
 if [[ ! -d "${QSEA_DIR}" ]]; then
     echo "ERROR: QSEA directory not found: ${QSEA_DIR}" >&2
@@ -29,10 +30,6 @@ for file in \
     qsea_sample_table.used.tsv \
     qsea_summary.txt \
     qsea_design_matrix.tsv \
-    qsea_region_stats.tsv \
-    qsea_beta_matrix.tsv \
-    qsea_counts_matrix.tsv \
-    qsea_region_annotation.tsv \
     qsea_dmr_significant.tsv \
     qsea_dmr_filtered.tsv \
     qsea_dmr_filtered.bed \
@@ -42,6 +39,20 @@ do
         cp "${QSEA_DIR}/${file}" "${REVIEW_DIR}/qsea/"
     fi
 done
+
+if [[ "${FULL_TABLES}" == "1" ]]; then
+    for file in \
+        qsea_region_stats.tsv \
+        qsea_beta_matrix.tsv \
+        qsea_counts_matrix.tsv \
+        qsea_region_annotation.tsv \
+        qsea_all_regions.tsv
+    do
+        if [[ -f "${QSEA_DIR}/${file}" ]]; then
+            cp "${QSEA_DIR}/${file}" "${REVIEW_DIR}/qsea/"
+        fi
+    done
+fi
 
 {
     echo "QSEA output inventory"
@@ -68,10 +79,22 @@ done
         if [[ -f "${QSEA_DIR}/${file}" ]]; then
             echo
             echo "===== ${file} ====="
-            head -n 6 "${QSEA_DIR}/${file}"
+            head -n 21 "${QSEA_DIR}/${file}"
         fi
     done
 } > "${REVIEW_DIR}/summaries/qsea_previews.txt"
+
+{
+    echo "QSEA headers"
+    echo "------------"
+    for file in qsea_region_stats.tsv qsea_beta_matrix.tsv qsea_counts_matrix.tsv qsea_region_annotation.tsv qsea_all_regions.tsv qsea_dmr_filtered.tsv; do
+        if [[ -f "${QSEA_DIR}/${file}" ]]; then
+            echo
+            echo "===== ${file} ====="
+            head -n 1 "${QSEA_DIR}/${file}"
+        fi
+    done
+} > "${REVIEW_DIR}/summaries/qsea_headers.txt"
 
 if [[ -f ".nextflow.log" ]]; then
     tail -n 300 ".nextflow.log" > "${REVIEW_DIR}/logs/nextflow_tail_300.log"
@@ -87,6 +110,11 @@ tar -czf "${ARCHIVE}" "${REVIEW_DIR}"
 echo "QSEA review bundle created:"
 echo "  ${ARCHIVE}"
 echo
+if [[ "${FULL_TABLES}" == "1" ]]; then
+    echo "Full large QSEA tables were included because FULL_TABLES=1."
+else
+    echo "Large all-region QSEA tables were not included. Set FULL_TABLES=1 to include them."
+fi
+echo
 echo "Bundle contents:"
 tar -tzf "${ARCHIVE}" | sed 's#^#  #'
-
