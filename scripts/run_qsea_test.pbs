@@ -13,11 +13,10 @@ source /home/shangying/miniconda3/bin/activate medip-nf
 module load singularity/4.2.1
 
 nextflow run . \
-  -profile hpc_singularity \
+  -profile hpc_singularity,qsea_conda \
   --input test_data/samplesheet.csv \
   --fasta /projects/sychen/projects/patnsb/ebv_kd_medip/ref/GRCh38.p14.genome.fa \
   --outdir results/fastq_to_bam_test \
   --analysis_method qsea \
   --contrast KD,control \
   -resume
-

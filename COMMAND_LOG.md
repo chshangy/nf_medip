@@ -939,6 +939,124 @@ Rerun after pushing/pulling:
 qsub scripts/run_qsea_test.pbs
 ```
 
+## 2026-05-13: Pause Checkpoint
+
+The project is paused because the HPC cluster is under maintenance.
+
+Current status:
+
+- GitHub repo is active: <https://github.com/chshangy/nf_medip>
+- Preprocessing through duplicate-marked filtered BAM, post-alignment QC, bigWig coverage, and MultiQC is validated on HPC.
+- QSEA module has been implemented but not yet successfully run.
+- ChIPseeker region annotation has been added to the QSEA R workflow.
+- The first QSEA run was blocked by PBS resource limits before R execution.
+- QSEA resource fix has been made locally in `nextflow.config`.
+
+Current validated workflow:
+
+```text
+INPUT_CHECK
+FASTQC_RAW
+TRIMGALORE_PAIRED
+FASTQC_TRIM
+BWA_MEM_SORT
+SAMTOOLS_MARKDUP
+BAM_FILTER
+POST_ALIGNMENT_QC
+BAM_COVERAGE
+MULTIQC
+```
+
+Latest successful HPC preprocessing run:
+
+```text
+Completed at: 12-May-2026 15:36:52
+Duration    : 15m 41s
+CPU hours   : 46.5 (85.4% cached)
+Succeeded   : 25
+Cached      : 24
+```
+
+Next actions after maintenance:
+
+```powershell
+cd D:\codex_projects\nf_pipelines\nf_medip
+git status
+git add .
+git commit -m "Add QSEA downstream outputs and tune resources"
+git push
+```
+
+Then on HPC:
+
+```bash
+cd /projects/sychen/projects/patnsb/medip/ebv-kd_medip/nf_medip_git
+git pull
+qsub scripts/run_qsea_test.pbs
+```
+
+Expected next possible blocker:
+
+- Missing R/Bioconductor packages inside the current QSEA container.
+- If that happens, create a dedicated QSEA + ChIPseeker container or add a Conda-based QSEA execution profile.
+
+## 2026-05-19: QSEA Missing R Package Fix
+
+The QSEA process started but failed inside the generic Bioconductor container:
+
+```text
+Error in library(qsea) : there is no package called 'qsea'
+```
+
+Cause:
+
+- `docker.io/bioconductor/bioconductor_docker:RELEASE_3_21` does not include the `qsea` package by default.
+
+Fix:
+
+- Added a mixed execution profile:
+
+```text
+qsea_conda
+```
+
+- The intended run profile is now:
+
+```text
+-profile hpc_singularity,qsea_conda
+```
+
+Behavior:
+
+- Existing preprocessing modules continue to use Singularity containers.
+- The QSEA process disables its container and uses its Conda directive.
+
+QSEA Conda packages:
+
+```text
+bioconductor-qsea
+bioconductor-bsgenome.hsapiens.ucsc.hg38
+bioconductor-biocparallel
+bioconductor-chipseeker
+bioconductor-txdb.hsapiens.ucsc.hg38.knowngene
+bioconductor-org.hs.eg.db
+r-base
+```
+
+Updated:
+
+```text
+modules/local/qsea_create_dmr.nf
+nextflow.config
+scripts/run_qsea_test.pbs
+```
+
+Rerun after pushing/pulling:
+
+```bash
+qsub scripts/run_qsea_test.pbs
+```
+
 
 ### Second Runtime Fix
 
