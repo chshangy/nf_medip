@@ -315,6 +315,58 @@ tail -n 120 logs/nf_medip_qsea.err
 tail -n 160 .nextflow.log
 ```
 
+## QSEA Success: 2026-05-19
+
+The QSEA branch completed successfully on the HPC.
+
+Completed workflow:
+
+```text
+FASTQC_RAW
+TRIMGALORE_PAIRED
+FASTQC_TRIM
+BWA_MEM_SORT
+SAMTOOLS_MARKDUP
+BAM_FILTER
+POST_ALIGNMENT_QC
+BAM_COVERAGE
+QSEA_CREATE_DMR
+MULTIQC
+```
+
+Run summary:
+
+```text
+Completed at: 19-May-2026 15:00:59
+Duration    : 16m 22s
+CPU hours   : 53.9 (96% cached)
+Succeeded   : 1
+Cached      : 49
+```
+
+QSEA runtime status:
+
+- Dedicated QSEA container was built and used successfully.
+- QSEA create-set, GLM fitting, DMR table generation, linked output tables, and ChIPseeker annotation completed.
+
+Added review helper:
+
+```text
+scripts/collect_qsea_review.sh
+```
+
+Next command on HPC:
+
+```bash
+bash scripts/collect_qsea_review.sh results/fastq_to_bam_test review_qsea
+```
+
+Then inspect or share:
+
+```text
+review_qsea.tar.gz
+```
+
 ## Downstream Analysis Direction
 
 The downstream methylation matrix and DMR workflow should start after the filtered BAM and coverage stage, and should support both:

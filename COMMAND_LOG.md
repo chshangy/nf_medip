@@ -924,6 +924,56 @@ Rerun with:
 qsub scripts/run_qsea_test.pbs
 ```
 
+## 2026-05-19: Successful QSEA Run
+
+The QSEA branch completed successfully.
+
+Run summary:
+
+```text
+Completed at: 19-May-2026 15:00:59
+Duration    : 16m 22s
+CPU hours   : 53.9 (96% cached)
+Succeeded   : 1
+Cached      : 49
+```
+
+Completed workflow:
+
+```text
+FASTQC_RAW
+TRIMGALORE_PAIRED
+FASTQC_TRIM
+BWA_MEM_SORT
+SAMTOOLS_MARKDUP
+BAM_FILTER
+POST_ALIGNMENT_QC
+BAM_COVERAGE
+QSEA_CREATE_DMR
+MULTIQC
+```
+
+Added QSEA review bundle script:
+
+```text
+scripts/collect_qsea_review.sh
+```
+
+Usage:
+
+```bash
+cd /projects/sychen/projects/patnsb/medip/ebv-kd_medip/nf_medip_git
+bash scripts/collect_qsea_review.sh results/fastq_to_bam_test review_qsea
+```
+
+The script creates:
+
+```text
+review_qsea.tar.gz
+```
+
+It includes table dimensions, previews, QSEA output tables, QSEA logs, Nextflow log tail, and PBS logs, but excludes large RData files by default.
+
 ## 2026-05-13: QSEA PBS Resource Submission Fix
 
 The first QSEA test reached the `QSEA_CREATE_DMR` process, but PBS rejected the job before execution:
