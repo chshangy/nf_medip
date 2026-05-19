@@ -899,6 +899,31 @@ Submit from the HPC repo root:
 qsub scripts/run_qsea_test.pbs
 ```
 
+## 2026-05-19: QSEA makeTable Annotation Argument Fix
+
+The custom QSEA container ran successfully and QSEA model fitting completed, but output table generation failed:
+
+```text
+Error in makeTable(...):
+  annotation must be a named list of GRanges objects
+```
+
+Cause:
+
+- The script passed `annotation = NULL` to `makeTable()`.
+- QSEA expects the annotation argument to be omitted or supplied as a named list of `GRanges` objects.
+
+Fix:
+
+- Removed `annotation = NULL` from both `makeTable()` calls.
+- ChIPseeker-based region annotation remains handled separately in `qsea_region_annotation.tsv`.
+
+Rerun with:
+
+```bash
+qsub scripts/run_qsea_test.pbs
+```
+
 ## 2026-05-13: QSEA PBS Resource Submission Fix
 
 The first QSEA test reached the `QSEA_CREATE_DMR` process, but PBS rejected the job before execution:

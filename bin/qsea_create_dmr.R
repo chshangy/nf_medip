@@ -223,7 +223,6 @@ result_all <- makeTable(
     qs = qsea_set_blind,
     glm = qsea_glm,
     keep = keep_all,
-    annotation = NULL,
     samples = getSampleNames(qsea_set_blind),
     groupMeans = getSampleGroups(qsea_set_blind),
     norm_method = c("counts", "beta")
@@ -418,7 +417,6 @@ result_sig <- makeTable(
     qs = qsea_set_blind,
     glm = qsea_glm,
     keep = sig,
-    annotation = NULL,
     samples = getSampleNames(qsea_set_blind),
     groupMeans = getSampleGroups(qsea_set_blind),
     norm_method = c("counts", "beta")
