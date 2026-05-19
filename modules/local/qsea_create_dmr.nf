@@ -40,7 +40,7 @@ EOF
 
     mkdir -p qsea
 
-    ${params.qsea_conda_bin} run -n ${params.qsea_conda_env} Rscript ${qsea_script} \\
+    Rscript ${qsea_script} \\
         --sample_table qsea_sample_table.tsv \\
         --outdir qsea \\
         --bsgenome ${params.qsea_bsgenome} \\

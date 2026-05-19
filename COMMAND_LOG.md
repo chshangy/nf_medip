@@ -1019,6 +1019,57 @@ Then submit:
 qsub scripts/run_qsea_test.pbs
 ```
 
+## 2026-05-19: Switch QSEA Runtime Plan to Singularity Container
+
+The explicit Conda workaround failed because the `qsea-medip` environment did not exist:
+
+```text
+EnvironmentLocationNotFound: Not a conda environment: /home/shangying/miniconda3/envs/qsea-medip
+```
+
+Decision:
+
+- Use a dedicated QSEA + ChIPseeker container instead of Conda.
+- This is better aligned with the rest of the pipeline and with nf-core-style reproducibility.
+
+Added:
+
+```text
+containers/qsea/Dockerfile
+containers/qsea/README.md
+.github/workflows/build-qsea-container.yml
+```
+
+Target image:
+
+```text
+ghcr.io/chshangy/nf-medip-qsea:0.1.0
+```
+
+QSEA process now uses:
+
+```text
+docker://ghcr.io/chshangy/nf-medip-qsea:0.1.0
+```
+
+The QSEA PBS script now uses only:
+
+```text
+-profile hpc_singularity
+```
+
+Next steps:
+
+1. Push these files to GitHub.
+2. In GitHub, run the `Build QSEA container` workflow manually.
+3. Confirm the GHCR package is public or otherwise accessible from the HPC.
+4. Pull latest code on HPC.
+5. Rerun:
+
+```bash
+qsub scripts/run_qsea_test.pbs
+```
+
 ## 2026-05-13: Pause Checkpoint
 
 The project is paused because the HPC cluster is under maintenance.

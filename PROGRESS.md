@@ -1,6 +1,6 @@
 # Project Progress
 
-Last updated: 2026-05-12
+Last updated: 2026-05-13
 
 ## Current Goal
 
@@ -227,11 +227,93 @@ If the container does not include `samtools`, the HPC run may fail at alignment.
 
 ## Immediate Next Step After Restart
 
-1. Inspect duplicate metrics from `results/fastq_to_bam_test/markdup/`.
-2. Confirm filtered BAMs are generated from marked BAMs and duplicate removal remains disabled by default.
-3. Test the QSEA downstream branch using filtered/duplicate-marked BAMs.
-4. Resolve QSEA runtime dependency/container strategy if needed.
-5. Add MEDIPS after QSEA is working.
+1. Commit and push the latest local changes if not already pushed.
+2. When the HPC maintenance is finished, pull the latest repo on the cluster.
+3. Rerun the QSEA PBS test after the QSEA resource fix.
+4. If QSEA starts but fails inside R, inspect missing packages/container issues.
+5. Resolve QSEA runtime dependency/container strategy if needed.
+6. Add MEDIPS after QSEA is working.
+
+## Pause Checkpoint: 2026-05-13
+
+The project is paused because the HPC cluster is under maintenance.
+
+Current validated pipeline layer:
+
+```text
+FASTQC_RAW
+TRIMGALORE_PAIRED
+FASTQC_TRIM
+BWA_MEM_SORT
+SAMTOOLS_MARKDUP
+BAM_FILTER
+POST_ALIGNMENT_QC
+BAM_COVERAGE
+MULTIQC
+```
+
+Latest successful markdup-enabled run:
+
+```text
+Completed at: 12-May-2026 15:36:52
+Duration    : 15m 41s
+CPU hours   : 46.5 (85.4% cached)
+Succeeded   : 25
+Cached      : 24
+```
+
+Duplicate marking was successful. Approximate duplicate totals:
+
+```text
+S1E11   4.59M
+S1E12   3.10M
+S1E13   3.84M
+S1S21   4.21M
+S1S22   3.89M
+S1S23   4.32M
+```
+
+Current downstream development state:
+
+- QSEA create-set and DMR module has been added.
+- QSEA outputs are split into linked tables using `region_id`.
+- ChIPseeker region-to-gene annotation has been added to the QSEA R script.
+- A QSEA PBS driver script has been added.
+
+QSEA test status:
+
+- The first QSEA test reached `QSEA_CREATE_DMR`.
+- PBS rejected the QSEA job before R execution:
+
+```text
+qsub: Job violates queue and/or server resource limits
+```
+
+Local fix already made:
+
+```text
+QSEA resources changed to:
+cpus   = 8
+memory = 40.GB
+time   = 48.h
+queue  = large
+```
+
+Next HPC command after maintenance:
+
+```bash
+cd /projects/sychen/projects/patnsb/medip/ebv-kd_medip/nf_medip_git
+git pull
+qsub scripts/run_qsea_test.pbs
+```
+
+If QSEA fails after starting, check:
+
+```bash
+tail -n 120 logs/nf_medip_qsea.out
+tail -n 120 logs/nf_medip_qsea.err
+tail -n 160 .nextflow.log
+```
 
 ## Downstream Analysis Direction
 
