@@ -4,7 +4,6 @@ process QSEA_CREATE_DMR {
 
     publishDir "${params.outdir}/qsea", mode: 'copy'
 
-    conda "bioconda::bioconductor-qsea bioconda::bioconductor-bsgenome.hsapiens.ucsc.hg38 bioconda::bioconductor-biocparallel bioconda::bioconductor-chipseeker bioconda::bioconductor-txdb.hsapiens.ucsc.hg38.knowngene bioconda::bioconductor-org.hs.eg.db conda-forge::r-base"
     container "${params.qsea_container}"
 
     input:
@@ -41,7 +40,7 @@ EOF
 
     mkdir -p qsea
 
-    Rscript ${qsea_script} \\
+    ${params.qsea_conda_bin} run -n ${params.qsea_conda_env} Rscript ${qsea_script} \\
         --sample_table qsea_sample_table.tsv \\
         --outdir qsea \\
         --bsgenome ${params.qsea_bsgenome} \\

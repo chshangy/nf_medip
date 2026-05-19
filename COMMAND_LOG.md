@@ -969,6 +969,56 @@ scripts/run_qsea_test.pbs
 COMMAND_LOG.md
 ```
 
+## 2026-05-19: Use Explicit Conda Run for QSEA
+
+The QSEA task still failed before R execution:
+
+```text
+conda: command not found
+/bin/activate: No such file or directory
+```
+
+Cause:
+
+- Nextflow-managed Conda activation still requires `conda` to be available inside the PBS task wrapper.
+- On this HPC, the task wrapper does not reliably inherit a usable Conda shell environment.
+
+Fix:
+
+- Removed Nextflow's `conda` directive from `QSEA_CREATE_DMR`.
+- Kept QSEA container disabled in the `qsea_conda` profile.
+- Run QSEA explicitly with:
+
+```bash
+/home/shangying/miniconda3/bin/conda run -n qsea-medip Rscript qsea_create_dmr.R ...
+```
+
+New parameters:
+
+```text
+--qsea_conda_bin /home/shangying/miniconda3/bin/conda
+--qsea_conda_env qsea-medip
+```
+
+Added environment setup script:
+
+```text
+scripts/setup_qsea_conda_env.sh
+```
+
+Run once on HPC before rerunning QSEA:
+
+```bash
+cd /projects/sychen/projects/patnsb/medip/ebv-kd_medip/nf_medip_git
+bash scripts/setup_qsea_conda_env.sh
+```
+
+Then submit:
+
+```bash
+qsub scripts/run_qsea_test.pbs
+```
+
 ## 2026-05-13: Pause Checkpoint
 
 The project is paused because the HPC cluster is under maintenance.
