@@ -939,6 +939,36 @@ Rerun after pushing/pulling:
 qsub scripts/run_qsea_test.pbs
 ```
 
+## 2026-05-19: Restrict Conda to QSEA Process
+
+The first run with `-profile hpc_singularity,qsea_conda` failed in `FASTQC_RAW` before reaching QSEA:
+
+```text
+conda: command not found
+/bin/activate: No such file or directory
+```
+
+Cause:
+
+- The `qsea_conda` profile enabled Conda globally.
+- Existing preprocessing modules also have `conda` directives, so Nextflow tried to activate Conda for containerized preprocessing tasks.
+- PBS task shells did not have the `conda` executable available on `PATH`.
+
+Fix:
+
+- Keep `conda.enabled = true` for the mixed profile.
+- Override non-QSEA labels to `conda = null`, so preprocessing continues to use Singularity containers.
+- Keep the QSEA label as Conda-only by setting `container = null`.
+- Export `/home/shangying/miniconda3/bin` in `scripts/run_qsea_test.pbs` before launching Nextflow.
+
+Updated:
+
+```text
+nextflow.config
+scripts/run_qsea_test.pbs
+COMMAND_LOG.md
+```
+
 ## 2026-05-13: Pause Checkpoint
 
 The project is paused because the HPC cluster is under maintenance.

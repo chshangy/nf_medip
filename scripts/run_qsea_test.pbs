@@ -10,6 +10,7 @@ cd "$PBS_O_WORKDIR"
 mkdir -p logs
 
 source /home/shangying/miniconda3/bin/activate medip-nf
+export PATH="/home/shangying/miniconda3/bin:$PATH"
 module load singularity/4.2.1
 
 nextflow run . \
