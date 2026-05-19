@@ -1339,6 +1339,7 @@ Fix:
 - Added `gzip -t "${ARCHIVE}"` so archive corruption is detected before download.
 - Updated `modules/local/qsea_create_dmr.nf` so QSEA writes outputs to the process root with `--outdir .`. This makes `publishDir "${params.outdir}/qsea"` publish the final QSEA files directly under `results/.../qsea/` rather than preserving a nested `qsea/` subdirectory.
 - Added `qsea_dmr_filtered_annotated.tsv`, which joins filtered DMR statistics with ChIPseeker annotation by `region_id`.
+- Sorted QSEA sample records by `sample_name` before writing `qsea_sample_table.tsv`, so sample columns in QSEA count/beta/DMR outputs are deterministic across reruns.
 
 Recommended rerun on HPC:
 

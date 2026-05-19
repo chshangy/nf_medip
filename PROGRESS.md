@@ -416,6 +416,8 @@ qsea_dmr_filtered_annotated.tsv
 
 All tables use `region_id` so users can join region statistics, beta-like methylation values, counts, and ChIPseeker gene annotation. The filtered DMR table is also exported in an annotation-joined form for immediate downstream interpretation.
 
+QSEA sample records are sorted by `sample_name` before the QSEA sample table is written, making sample columns deterministic across reruns.
+
 ## QSEA Review Bundle Follow-Up
 
 The first downloaded `review_qsea.tar.gz` archive was incomplete/corrupted after transfer. It only listed logs and an empty `qsea/` directory before `tar` reported a damaged/truncated archive.

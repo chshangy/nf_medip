@@ -31,7 +31,7 @@ process QSEA_CREATE_DMR {
     path "qsea_run.log", emit: log
 
     script:
-    def rows = sample_records.collect { rec ->
+    def rows = sample_records.sort { a, b -> a.sample_name <=> b.sample_name }.collect { rec ->
         "${rec.sample_name}\t${rec.file_name}\t${rec.group}\t${rec.samples}\t${rec.batch}"
     }.join('\n')
     """
