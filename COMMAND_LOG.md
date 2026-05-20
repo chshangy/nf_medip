@@ -1443,3 +1443,10 @@ Fix:
 - Use dynamic base columns: `region_id`, coordinates, and whichever CpG/coupling feature columns are actually present.
 - Broaden count/RPKM/RMS column detection.
 - Intersect requested columns with `names(result_all)` before writing matrices.
+
+Follow-up fix:
+
+- MEDIPS coordinate columns can also vary by result schema.
+- Added broader coordinate normalization for `chr`, `window_start`, and `window_end`.
+- Added `medips_result_columns.txt` so future schema mismatches can be diagnosed directly from published outputs.
+- Annotation and BED export now skip gracefully if genomic coordinate columns cannot be recognized.

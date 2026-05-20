@@ -164,12 +164,29 @@ rename_if_present <- function(x, from, to) {
     x
 }
 
+rename_first_present <- function(x, candidates, to) {
+    hit <- candidates[candidates %in% names(x)][1]
+    if (!is.na(hit) && !to %in% names(x)) {
+        names(x)[names(x) == hit] <- to
+    }
+    x
+}
+
 result_all <- medips_result
-result_all <- rename_if_present(result_all, "Chr", "chr")
-result_all <- rename_if_present(result_all, "Start", "window_start")
-result_all <- rename_if_present(result_all, "Stop", "window_end")
-result_all <- rename_if_present(result_all, "CF", "CpG_count")
-result_all$region_id <- paste(result_all$chr, result_all$window_start, result_all$window_end, sep = ":")
+writeLines(names(result_all), file.path(outdir, "medips_result_columns.txt"))
+
+result_all <- rename_first_present(result_all, c("Chr", "chr", "chrom", "chromosome"), "chr")
+result_all <- rename_first_present(result_all, c("Start", "start", "window_start", "window.start"), "window_start")
+result_all <- rename_first_present(result_all, c("Stop", "stop", "End", "end", "window_end", "window.end"), "window_end")
+result_all <- rename_first_present(result_all, c("CF", "CpG_count", "CpG.count", "coupling", "coupling_factor"), "CpG_count")
+
+has_coordinates <- all(c("chr", "window_start", "window_end") %in% names(result_all))
+if (has_coordinates) {
+    result_all$region_id <- paste(result_all$chr, result_all$window_start, result_all$window_end, sep = ":")
+} else {
+    warning("MEDIPS result table did not contain recognized coordinate columns; using row-based region IDs and skipping genomic annotation/bed output.")
+    result_all$region_id <- paste0("region_", seq_len(nrow(result_all)))
+}
 
 logfc_col <- if ("edgeR.logFC" %in% names(result_all)) "edgeR.logFC" else "score.log2.ratio"
 pvalue_col <- if ("edgeR.p.value" %in% names(result_all)) "edgeR.p.value" else "score.p.value"
@@ -194,7 +211,7 @@ if (!is.na(logfc_col) && logfc_col %in% names(result_all)) {
 id_cols <- c("region_id")
 coord_cols <- c("chr", "window_start", "window_end")
 feature_cols <- intersect(c("CpG_count", "CF", "coupling", "coupling_factor"), names(result_all))
-base_cols <- unique(c(id_cols, coord_cols, feature_cols))
+base_cols <- intersect(unique(c(id_cols, coord_cols, feature_cols)), names(result_all))
 stat_cols <- unique(c(
     base_cols,
     logfc_col,
@@ -258,7 +275,7 @@ write.table(
 )
 
 annotation_table <- result_all[, base_cols, drop = FALSE]
-if (bool_arg("annotate_regions", TRUE)) {
+if (bool_arg("annotate_regions", TRUE) && has_coordinates) {
     suppressPackageStartupMessages({
         library(GenomicRanges)
         library(ChIPseeker)
@@ -309,6 +326,8 @@ if (bool_arg("annotate_regions", TRUE)) {
         all.x = TRUE,
         sort = FALSE
     )
+} else if (bool_arg("annotate_regions", TRUE) && !has_coordinates) {
+    warning("Skipping MEDIPS annotation because genomic coordinate columns were not recognized.")
 }
 
 write.table(
@@ -363,7 +382,7 @@ write.table(
 )
 
 bed <- data.frame()
-if (nrow(result_dmr) > 0) {
+if (nrow(result_dmr) > 0 && has_coordinates) {
     bed <- data.frame(
         chrom = result_dmr$chr,
         chromStart = result_dmr$window_start,

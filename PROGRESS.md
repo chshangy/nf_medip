@@ -462,6 +462,8 @@ First HPC MEDIPS test reached container pulling but timed out during Singularity
 
 The next MEDIPS test completed the MEDIPS computation itself but failed during pipeline table export because MEDIPS output column names differed from the first assumed schema. `bin/medips_create_dmr.R` now detects available CpG/coupling, count, RPKM, and RMS columns dynamically before writing output matrices.
 
+Additional MEDIPS hardening added after a second schema failure: coordinate columns are now detected from multiple possible names, `medips_result_columns.txt` is exported for debugging, and annotation/BED output is skipped gracefully if coordinates cannot be recognized.
+
 ## QSEA Review Bundle Follow-Up
 
 The first downloaded `review_qsea.tar.gz` archive was incomplete/corrupted after transfer. It only listed logs and an empty `qsea/` directory before `tar` reported a damaged/truncated archive.

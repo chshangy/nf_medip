@@ -17,6 +17,7 @@ process MEDIPS_CREATE_DMR {
     path "medips_sets.RData", emit: medips_sets
     path "medips_coupling_set.RData", emit: coupling_set
     path "medips_result.RData", emit: result_object
+    path "medips_result_columns.txt", emit: result_columns
     path "medips_summary.txt", emit: summary
     path "medips_all_regions.tsv", emit: all_regions
     path "medips_region_stats.tsv", emit: region_stats

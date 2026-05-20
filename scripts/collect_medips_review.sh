@@ -29,6 +29,7 @@ mkdir -p "${REVIEW_DIR}"/{medips,logs,summaries}
 for file in \
     medips_sample_table.used.tsv \
     medips_summary.txt \
+    medips_result_columns.txt \
     medips_dmr_significant.tsv \
     medips_dmr_filtered.tsv \
     medips_dmr_filtered_annotated.tsv \
