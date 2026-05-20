@@ -1473,3 +1473,27 @@ KD_vs_control_adjPval
 ```
 
 - The standardized log2FC is `-edgeR.logFC`, matching the test-vs-reference direction used by QSEA.
+
+## 2026-05-20: Project-Local TMPDIR For HPC Jobs
+
+The MEDIPS rerun failed before R started because the compute node default temp filesystem was full:
+
+```text
+cannot create temp file for here-document: No space left on device
+Fatal error: cannot create 'R_TempDir'
+```
+
+Fix:
+
+- PBS run scripts now create `tmp/` under the project work directory.
+- `TMPDIR`, `TEMP`, and `TMP` are exported to that project-local directory.
+- The `hpc_singularity` `beforeScript` also sets task-level temp variables to `${PWD}/tmp`.
+
+Updated scripts:
+
+```text
+scripts/run_fastq_to_bam.pbs
+scripts/run_qsea_test.pbs
+scripts/run_medips_test.pbs
+nextflow.config
+```

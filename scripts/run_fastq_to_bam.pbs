@@ -8,8 +8,13 @@
 
 cd "$PBS_O_WORKDIR"
 mkdir -p logs
+mkdir -p tmp
 
 source /home/shangying/miniconda3/bin/activate medip-nf
+export PATH="/home/shangying/miniconda3/bin:$PATH"
+export TMPDIR="$PBS_O_WORKDIR/tmp"
+export TEMP="$TMPDIR"
+export TMP="$TMPDIR"
 module load singularity/4.2.1
 
 nextflow run . \
@@ -18,4 +23,3 @@ nextflow run . \
   --fasta /projects/sychen/projects/patnsb/ebv_kd_medip/ref/GRCh38.p14.genome.fa \
   --outdir results/fastq_to_bam_test \
   -resume
-

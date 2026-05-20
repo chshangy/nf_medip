@@ -466,6 +466,8 @@ Additional MEDIPS hardening added after a second schema failure: coordinate colu
 
 MEDIPS contrast direction is now standardized to match QSEA. Raw MEDIPS `edgeR.logFC` is preserved, and test-vs-reference columns such as `KD_vs_control_log2FC`, `KD_vs_control_pvalue`, and `KD_vs_control_adjPval` are added. Because MEDIPS reports `log2(MSet1/MSet2)` and this workflow uses reference as `MSet1`, the standardized log2FC is the negative of raw `edgeR.logFC`.
 
+The latest MEDIPS rerun hit an HPC temp-space problem (`No space left on device`, `cannot create R_TempDir`). PBS scripts and the HPC profile now set `TMPDIR`, `TEMP`, and `TMP` to a project-local `tmp/` directory.
+
 ## QSEA Review Bundle Follow-Up
 
 The first downloaded `review_qsea.tar.gz` archive was incomplete/corrupted after transfer. It only listed logs and an empty `qsea/` directory before `tar` reported a damaged/truncated archive.
