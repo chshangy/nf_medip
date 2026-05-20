@@ -458,6 +458,10 @@ The MEDIPS runtime is added to the R methylation container, intended image:
 docker://ghcr.io/chshangy/nf-medip-qsea:0.2.0
 ```
 
+First HPC MEDIPS test reached container pulling but timed out during Singularity OCI-to-SIF conversion. The HPC Singularity pull timeout is now increased to 2 hours in `nextflow.config`.
+
+The next MEDIPS test completed the MEDIPS computation itself but failed during pipeline table export because MEDIPS output column names differed from the first assumed schema. `bin/medips_create_dmr.R` now detects available CpG/coupling, count, RPKM, and RMS columns dynamically before writing output matrices.
+
 ## QSEA Review Bundle Follow-Up
 
 The first downloaded `review_qsea.tar.gz` archive was incomplete/corrupted after transfer. It only listed logs and an empty `qsea/` directory before `tar` reported a damaged/truncated archive.

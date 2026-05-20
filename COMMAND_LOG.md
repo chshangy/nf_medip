@@ -1404,3 +1404,42 @@ Planned HPC test:
 qsub scripts/run_medips_test.pbs
 bash scripts/collect_medips_review.sh results/fastq_to_bam_test review_medips
 ```
+
+## 2026-05-20: Increase Singularity Pull Timeout
+
+The first MEDIPS HPC run failed before executing MEDIPS because Singularity timed out while pulling/converting the larger R methylation image:
+
+```text
+Failed to pull singularity image
+status : 143
+hint   : Try and increase singularity.pullTimeout in the config (current is "20m")
+```
+
+Fix:
+
+- Set `singularity.pullTimeout = '2 h'` in the `hpc_singularity` profile.
+
+Rerun after push/pull:
+
+```bash
+qsub scripts/run_medips_test.pbs
+```
+
+## 2026-05-20: MEDIPS Output Column Detection Fix
+
+The MEDIPS process ran through `MEDIPS.createSet`, CpG coupling, RMS calculation, and `MEDIPS.meth`, then failed while writing output matrices:
+
+```text
+Error in [.data.frame(...): undefined columns selected
+```
+
+Cause:
+
+- The script assumed a fixed CpG feature column name and strict `.counts`, `.rpkm`, `.rms` suffix patterns.
+- MEDIPS output column names vary by package/version/result table.
+
+Fix:
+
+- Use dynamic base columns: `region_id`, coordinates, and whichever CpG/coupling feature columns are actually present.
+- Broaden count/RPKM/RMS column detection.
+- Intersect requested columns with `names(result_all)` before writing matrices.

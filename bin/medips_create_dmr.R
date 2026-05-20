@@ -192,10 +192,11 @@ if (!is.na(logfc_col) && logfc_col %in% names(result_all)) {
 }
 
 id_cols <- c("region_id")
-coord_cols <- c("chr", "window_start", "window_end", "CpG_count")
+coord_cols <- c("chr", "window_start", "window_end")
+feature_cols <- intersect(c("CpG_count", "CF", "coupling", "coupling_factor"), names(result_all))
+base_cols <- unique(c(id_cols, coord_cols, feature_cols))
 stat_cols <- unique(c(
-    id_cols,
-    coord_cols,
+    base_cols,
     logfc_col,
     pvalue_col,
     adjp_col,
@@ -213,13 +214,19 @@ write.table(
     row.names = FALSE
 )
 
-count_cols <- grep("\\.counts$", names(result_all), value = TRUE)
-rpkm_cols <- grep("\\.rpkm$", names(result_all), value = TRUE)
-rms_cols <- grep("\\.rms$", names(result_all), value = TRUE)
-mean_cols <- grep("MSets[12]\\.(counts|rpkm|rms)\\.mean$", names(result_all), value = TRUE)
+count_cols <- grep("(^|\\.)(counts?|count)(\\.|$)", names(result_all), value = TRUE, ignore.case = TRUE)
+rpkm_cols <- grep("(^|\\.)rpkm(\\.|$)", names(result_all), value = TRUE, ignore.case = TRUE)
+rms_cols <- grep("(^|\\.)rms(\\.|$)", names(result_all), value = TRUE, ignore.case = TRUE)
+mean_cols <- grep("(counts?|count|rpkm|rms).*mean|mean.*(counts?|count|rpkm|rms)", names(result_all), value = TRUE, ignore.case = TRUE)
+count_cols <- setdiff(count_cols, c(logfc_col, pvalue_col, adjp_col))
+rpkm_cols <- setdiff(rpkm_cols, c(logfc_col, pvalue_col, adjp_col))
+rms_cols <- setdiff(rms_cols, c(logfc_col, pvalue_col, adjp_col))
+select_existing <- function(cols) {
+    intersect(unique(cols), names(result_all))
+}
 
 write.table(
-    result_all[, unique(c(id_cols, coord_cols, count_cols, grep("counts\\.mean$", mean_cols, value = TRUE))), drop = FALSE],
+    result_all[, select_existing(c(base_cols, count_cols, grep("counts?|count", mean_cols, value = TRUE, ignore.case = TRUE))), drop = FALSE],
     file.path(outdir, "medips_counts_matrix.tsv"),
     sep = "\t",
     quote = FALSE,
@@ -227,7 +234,7 @@ write.table(
 )
 
 write.table(
-    result_all[, unique(c(id_cols, coord_cols, rpkm_cols, grep("rpkm\\.mean$", mean_cols, value = TRUE))), drop = FALSE],
+    result_all[, select_existing(c(base_cols, rpkm_cols, grep("rpkm", mean_cols, value = TRUE, ignore.case = TRUE))), drop = FALSE],
     file.path(outdir, "medips_rpkm_matrix.tsv"),
     sep = "\t",
     quote = FALSE,
@@ -235,7 +242,7 @@ write.table(
 )
 
 write.table(
-    result_all[, unique(c(id_cols, coord_cols, rms_cols, grep("rms\\.mean$", mean_cols, value = TRUE))), drop = FALSE],
+    result_all[, select_existing(c(base_cols, rms_cols, grep("rms", mean_cols, value = TRUE, ignore.case = TRUE))), drop = FALSE],
     file.path(outdir, "medips_rms_matrix.tsv"),
     sep = "\t",
     quote = FALSE,
@@ -250,7 +257,7 @@ write.table(
     row.names = FALSE
 )
 
-annotation_table <- result_all[, c(id_cols, coord_cols), drop = FALSE]
+annotation_table <- result_all[, base_cols, drop = FALSE]
 if (bool_arg("annotate_regions", TRUE)) {
     suppressPackageStartupMessages({
         library(GenomicRanges)
