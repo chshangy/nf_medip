@@ -1474,6 +1474,10 @@ KD_vs_control_adjPval
 
 - The standardized log2FC is `-edgeR.logFC`, matching the test-vs-reference direction used by QSEA.
 
+Follow-up syntax fix:
+
+- Replaced a C-style block comment in `bin/medips_create_dmr.R` with R `#` comments. R does not support `/* ... */` comments.
+
 ## 2026-05-20: Project-Local TMPDIR For HPC Jobs
 
 The MEDIPS rerun failed before R started because the compute node default temp filesystem was full:

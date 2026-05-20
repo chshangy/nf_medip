@@ -197,11 +197,9 @@ contrast_pvalue_col <- paste0(contrast_name, "_pvalue")
 contrast_adjp_col <- paste0(contrast_name, "_adjPval")
 
 if (!is.na(logfc_col) && logfc_col %in% names(result_all)) {
-    /*
-     * MEDIPS.meth reports log2(MSet1/MSet2). In this workflow MSet1 is the
-     * reference group and MSet2 is the test group, so invert the sign to
-     * match the user-facing test_vs_reference convention used by QSEA.
-     */
+    # MEDIPS.meth reports log2(MSet1/MSet2). In this workflow MSet1 is the
+    # reference group and MSet2 is the test group, so invert the sign to
+    # match the user-facing test_vs_reference convention used by QSEA.
     result_all[[contrast_logfc_col]] <- -result_all[[logfc_col]]
 }
 if (!is.na(pvalue_col) && pvalue_col %in% names(result_all)) {
