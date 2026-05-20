@@ -1,4 +1,4 @@
-name: Build QSEA container
+name: Build R methylation container
 
 on:
   workflow_dispatch:
@@ -6,7 +6,7 @@ on:
       tag:
         description: Container tag
         required: true
-        default: "0.1.0"
+        default: "0.2.0"
 
 permissions:
   contents: read
@@ -36,4 +36,3 @@ jobs:
           context: containers/qsea
           push: true
           tags: ghcr.io/chshangy/nf-medip-qsea:${{ github.event.inputs.tag }}
-

@@ -12,6 +12,7 @@ include { BAM_FILTER } from './modules/local/bam_filter'
 include { POST_ALIGNMENT_QC } from './modules/local/post_alignment_qc'
 include { BAM_COVERAGE } from './modules/local/bam_coverage'
 include { QSEA_CREATE_DMR } from './modules/local/qsea_create_dmr'
+include { MEDIPS_CREATE_DMR } from './modules/local/medips_create_dmr'
 include { MULTIQC } from './modules/local/multiqc'
 
 /*
@@ -103,6 +104,32 @@ workflow {
         ch_qsea_script = Channel.value(file("${projectDir}/bin/qsea_create_dmr.R", checkIfExists: true))
 
         QSEA_CREATE_DMR(ch_qsea_sample_records, ch_qsea_bam_files, ch_qsea_script)
+    }
+
+    if (params.analysis_method in ['medips', 'both']) {
+        if (!params.contrast) {
+            error "Please provide --contrast test,reference when --analysis_method is medips or both"
+        }
+
+        ch_medips_sample_records = BAM_FILTER.out.bam_bai
+            .map { meta, bam, bai ->
+                [
+                    sample_name: meta.id,
+                    file_name  : bam.getName(),
+                    group      : meta.group,
+                    samples    : meta.id,
+                    batch      : meta.batch ?: 'batch1'
+                ]
+            }
+            .collect()
+
+        ch_medips_bam_files = BAM_FILTER.out.bam_bai
+            .flatMap { meta, bam, bai -> [bam, bai] }
+            .collect()
+
+        ch_medips_script = Channel.value(file("${projectDir}/bin/medips_create_dmr.R", checkIfExists: true))
+
+        MEDIPS_CREATE_DMR(ch_medips_sample_records, ch_medips_bam_files, ch_medips_script)
     }
 
     ch_multiqc_files = ch_multiqc_files

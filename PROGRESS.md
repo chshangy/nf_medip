@@ -418,6 +418,46 @@ All tables use `region_id` so users can join region statistics, beta-like methyl
 
 QSEA sample records are sorted by `sample_name` before the QSEA sample table is written, making sample columns deterministic across reruns.
 
+## MEDIPS Downstream Branch
+
+Started implementation of the second downstream option:
+
+```text
+--analysis_method medips
+```
+
+MEDIPS is implemented as a parallel branch after filtered BAM generation. It uses the same sample sheet metadata and contrast syntax as QSEA:
+
+```text
+--contrast KD,control
+```
+
+Planned/implemented MEDIPS outputs:
+
+```text
+medips_region_stats.tsv
+medips_counts_matrix.tsv
+medips_rpkm_matrix.tsv
+medips_rms_matrix.tsv
+medips_region_annotation.tsv
+medips_dmr_significant.tsv
+medips_dmr_filtered.tsv
+medips_dmr_filtered_annotated.tsv
+medips_dmr_filtered.bed
+```
+
+Important terminology:
+
+- MEDIPS does not output QSEA-style beta estimates.
+- MEDIPS reports CpG-density-normalized relative methylation score (`rms`) when `MeDIP=TRUE`.
+- The MEDIPS methylation matrix is therefore named `medips_rms_matrix.tsv`, not `beta_matrix.tsv`.
+
+The MEDIPS runtime is added to the R methylation container, intended image:
+
+```text
+docker://ghcr.io/chshangy/nf-medip-qsea:0.2.0
+```
+
 ## QSEA Review Bundle Follow-Up
 
 The first downloaded `review_qsea.tar.gz` archive was incomplete/corrupted after transfer. It only listed logs and an empty `qsea/` directory before `tar` reported a damaged/truncated archive.

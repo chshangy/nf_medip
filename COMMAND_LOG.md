@@ -1350,3 +1350,57 @@ gzip -t review_qsea_light.tar.gz
 tar -tzf review_qsea_light.tar.gz | head -50
 ls -lh review_qsea_light.tar.gz
 ```
+
+## 2026-05-19: MEDIPS Downstream Branch Added
+
+Added a second downstream analysis method:
+
+```bash
+--analysis_method medips
+```
+
+New files:
+
+```text
+bin/medips_create_dmr.R
+modules/local/medips_create_dmr.nf
+scripts/run_medips_test.pbs
+scripts/collect_medips_review.sh
+```
+
+Updated:
+
+```text
+main.nf
+nextflow.config
+containers/qsea/Dockerfile
+.github/workflows/build-qsea-container.yml
+containers/qsea/README.md
+```
+
+MEDIPS outputs:
+
+```text
+medips_region_stats.tsv
+medips_counts_matrix.tsv
+medips_rpkm_matrix.tsv
+medips_rms_matrix.tsv
+medips_region_annotation.tsv
+medips_dmr_significant.tsv
+medips_dmr_filtered.tsv
+medips_dmr_filtered_annotated.tsv
+medips_dmr_filtered.bed
+```
+
+Notes:
+
+- MEDIPS uses `MEDIPS.createSet`, `MEDIPS.couplingVector`, and `MEDIPS.meth`.
+- MEDIPS does not generate QSEA-like beta estimates; the methylation-score output is the CpG-density-normalized `rms` matrix.
+- The R methylation container should be rebuilt and pushed as `ghcr.io/chshangy/nf-medip-qsea:0.2.0` before the HPC MEDIPS run.
+
+Planned HPC test:
+
+```bash
+qsub scripts/run_medips_test.pbs
+bash scripts/collect_medips_review.sh results/fastq_to_bam_test review_medips
+```
