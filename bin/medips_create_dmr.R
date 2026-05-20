@@ -192,6 +192,25 @@ logfc_col <- if ("edgeR.logFC" %in% names(result_all)) "edgeR.logFC" else "score
 pvalue_col <- if ("edgeR.p.value" %in% names(result_all)) "edgeR.p.value" else "score.p.value"
 adjp_col <- if ("edgeR.adj.p.value" %in% names(result_all)) "edgeR.adj.p.value" else "score.adj.p.value"
 
+contrast_logfc_col <- paste0(contrast_name, "_log2FC")
+contrast_pvalue_col <- paste0(contrast_name, "_pvalue")
+contrast_adjp_col <- paste0(contrast_name, "_adjPval")
+
+if (!is.na(logfc_col) && logfc_col %in% names(result_all)) {
+    /*
+     * MEDIPS.meth reports log2(MSet1/MSet2). In this workflow MSet1 is the
+     * reference group and MSet2 is the test group, so invert the sign to
+     * match the user-facing test_vs_reference convention used by QSEA.
+     */
+    result_all[[contrast_logfc_col]] <- -result_all[[logfc_col]]
+}
+if (!is.na(pvalue_col) && pvalue_col %in% names(result_all)) {
+    result_all[[contrast_pvalue_col]] <- result_all[[pvalue_col]]
+}
+if (!is.na(adjp_col) && adjp_col %in% names(result_all)) {
+    result_all[[contrast_adjp_col]] <- result_all[[adjp_col]]
+}
+
 rms_mean_cols <- grep("MSets[12]\\.rms\\.mean$", names(result_all), value = TRUE)
 if (length(rms_mean_cols) >= 2) {
     result_all$deltaRMS <- result_all[[rms_mean_cols[2]]] - result_all[[rms_mean_cols[1]]]
@@ -214,6 +233,9 @@ feature_cols <- intersect(c("CpG_count", "CF", "coupling", "coupling_factor"), n
 base_cols <- intersect(unique(c(id_cols, coord_cols, feature_cols)), names(result_all))
 stat_cols <- unique(c(
     base_cols,
+    contrast_logfc_col,
+    contrast_pvalue_col,
+    contrast_adjp_col,
     logfc_col,
     pvalue_col,
     adjp_col,

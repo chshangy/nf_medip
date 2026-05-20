@@ -1450,3 +1450,26 @@ Follow-up fix:
 - Added broader coordinate normalization for `chr`, `window_start`, and `window_end`.
 - Added `medips_result_columns.txt` so future schema mismatches can be diagnosed directly from published outputs.
 - Annotation and BED export now skip gracefully if genomic coordinate columns cannot be recognized.
+
+## 2026-05-20: Standardize MEDIPS Contrast Direction
+
+MEDIPS reports differential signal as:
+
+```text
+log2(MSet1/MSet2)
+```
+
+In the pipeline, `MSet1` is the reference group and `MSet2` is the test group. For `--contrast KD,control`, raw `edgeR.logFC` is therefore `control_vs_KD`, while QSEA reports `KD_vs_control`.
+
+Fix:
+
+- Preserve raw MEDIPS columns such as `edgeR.logFC`.
+- Add user-facing standardized columns:
+
+```text
+KD_vs_control_log2FC
+KD_vs_control_pvalue
+KD_vs_control_adjPval
+```
+
+- The standardized log2FC is `-edgeR.logFC`, matching the test-vs-reference direction used by QSEA.

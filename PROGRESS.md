@@ -464,6 +464,8 @@ The next MEDIPS test completed the MEDIPS computation itself but failed during p
 
 Additional MEDIPS hardening added after a second schema failure: coordinate columns are now detected from multiple possible names, `medips_result_columns.txt` is exported for debugging, and annotation/BED output is skipped gracefully if coordinates cannot be recognized.
 
+MEDIPS contrast direction is now standardized to match QSEA. Raw MEDIPS `edgeR.logFC` is preserved, and test-vs-reference columns such as `KD_vs_control_log2FC`, `KD_vs_control_pvalue`, and `KD_vs_control_adjPval` are added. Because MEDIPS reports `log2(MSet1/MSet2)` and this workflow uses reference as `MSet1`, the standardized log2FC is the negative of raw `edgeR.logFC`.
+
 ## QSEA Review Bundle Follow-Up
 
 The first downloaded `review_qsea.tar.gz` archive was incomplete/corrupted after transfer. It only listed logs and an empty `qsea/` directory before `tar` reported a damaged/truncated archive.
