@@ -532,3 +532,4 @@ Implementation notes:
 - MEDIPS matrix mode calls `MEDIPS.meth()` with all samples in `MSet1` and no `MSet2`, using MEDIPS coverage summarization without differential testing.
 - Existing QSEA and MEDIPS HPC DMR PBS scripts now include `--analysis_mode dmr` explicitly.
 - Added `scripts/run_qsea_matrix_test.pbs` for the first matrix-only HPC test.
+- Added `scripts/run_medips_matrix_test.pbs` for the MEDIPS matrix-only HPC test.

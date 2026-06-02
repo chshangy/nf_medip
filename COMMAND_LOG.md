@@ -1554,3 +1554,15 @@ This writes to:
 ```text
 results/qsea_matrix_test
 ```
+
+Added a matching MEDIPS matrix-mode PBS script:
+
+```bash
+qsub scripts/run_medips_matrix_test.pbs
+```
+
+This writes to:
+
+```text
+results/medips_matrix_test
+```
