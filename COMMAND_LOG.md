@@ -1542,3 +1542,15 @@ nextflow run . -profile hpc_singularity \
   --outdir results/qsea_dmr_test \
   -resume
 ```
+
+Added a dedicated PBS script for the first matrix-mode HPC test:
+
+```bash
+qsub scripts/run_qsea_matrix_test.pbs
+```
+
+This writes to:
+
+```text
+results/qsea_matrix_test
+```

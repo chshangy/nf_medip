@@ -531,3 +531,4 @@ Implementation notes:
 - QSEA matrix mode uses an intercept-only design (`~ 1`) and skips `addContrast()`/`isSignificant()`.
 - MEDIPS matrix mode calls `MEDIPS.meth()` with all samples in `MSet1` and no `MSet2`, using MEDIPS coverage summarization without differential testing.
 - Existing QSEA and MEDIPS HPC DMR PBS scripts now include `--analysis_mode dmr` explicitly.
+- Added `scripts/run_qsea_matrix_test.pbs` for the first matrix-only HPC test.
