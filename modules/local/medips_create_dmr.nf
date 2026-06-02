@@ -1,5 +1,5 @@
 process MEDIPS_CREATE_DMR {
-    tag "${params.contrast}"
+    tag "${params.analysis_mode}${params.contrast ? ':' + params.contrast : ''}"
     label 'medips'
 
     publishDir "${params.outdir}/medips", mode: 'copy'
@@ -32,6 +32,7 @@ process MEDIPS_CREATE_DMR {
     path "medips_run.log", emit: log
 
     script:
+    def contrast_arg = params.analysis_mode == 'dmr' ? "--contrast ${params.contrast}" : ''
     def rows = sample_records.sort { a, b -> a.sample_name <=> b.sample_name }.collect { rec ->
         "${rec.sample_name}\t${rec.file_name}\t${rec.group}\t${rec.samples}\t${rec.batch}"
     }.join('\n')
@@ -45,7 +46,8 @@ EOF
         --sample_table medips_sample_table.tsv \\
         --outdir . \\
         --bsgenome ${params.medips_bsgenome} \\
-        --contrast ${params.contrast} \\
+        --analysis_mode ${params.analysis_mode} \\
+        ${contrast_arg} \\
         --chr_select ${params.medips_chr_select} \\
         --window_size ${params.medips_window_size} \\
         --extend ${params.medips_extend} \\

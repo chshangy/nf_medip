@@ -1,5 +1,5 @@
 process QSEA_CREATE_DMR {
-    tag "${params.contrast}"
+    tag "${params.analysis_mode}${params.contrast ? ':' + params.contrast : ''}"
     label 'qsea'
 
     publishDir "${params.outdir}/qsea", mode: 'copy'
@@ -31,6 +31,7 @@ process QSEA_CREATE_DMR {
     path "qsea_run.log", emit: log
 
     script:
+    def contrast_arg = params.analysis_mode == 'dmr' ? "--contrast ${params.contrast}" : ''
     def rows = sample_records.sort { a, b -> a.sample_name <=> b.sample_name }.collect { rec ->
         "${rec.sample_name}\t${rec.file_name}\t${rec.group}\t${rec.samples}\t${rec.batch}"
     }.join('\n')
@@ -44,7 +45,8 @@ EOF
         --sample_table qsea_sample_table.tsv \\
         --outdir . \\
         --bsgenome ${params.qsea_bsgenome} \\
-        --contrast ${params.contrast} \\
+        --analysis_mode ${params.analysis_mode} \\
+        ${contrast_arg} \\
         --chr_select ${params.qsea_chr_select} \\
         --window_size ${params.qsea_window_size} \\
         --fragment_length ${params.qsea_fragment_length} \\

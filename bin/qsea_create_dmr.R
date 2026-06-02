@@ -22,7 +22,7 @@ parse_args <- function(args) {
 
 arg <- parse_args(commandArgs(trailingOnly = TRUE))
 
-required <- c("sample_table", "outdir", "bsgenome", "contrast")
+required <- c("sample_table", "outdir", "bsgenome")
 missing <- setdiff(required, names(arg))
 if (length(missing) > 0) {
     stop("Missing required arguments: ", paste(missing, collapse = ", "))
@@ -55,6 +55,16 @@ on.exit(sink(), add = TRUE)
 message("Starting QSEA analysis")
 message("Sample table: ", arg$sample_table)
 message("Output directory: ", outdir)
+
+analysis_mode <- arg$analysis_mode
+if (is.null(analysis_mode) || analysis_mode == "") {
+    analysis_mode <- "matrix"
+}
+if (!analysis_mode %in% c("matrix", "dmr")) {
+    stop("--analysis_mode must be either matrix or dmr")
+}
+run_dmr <- analysis_mode == "dmr"
+message("Analysis mode: ", analysis_mode)
 
 suppressPackageStartupMessages({
     library(qsea)
@@ -89,26 +99,38 @@ if (!all(file.exists(sample_table$file_name))) {
     stop("BAM files not found: ", paste(missing_bams, collapse = ", "))
 }
 
-contrast <- strsplit(arg$contrast, ",", fixed = TRUE)[[1]]
-contrast <- trimws(contrast)
-if (length(contrast) != 2) {
-    stop("--contrast must be formatted as test,reference, for example KD,control")
-}
-test_group <- contrast[[1]]
-reference_group <- contrast[[2]]
+test_group <- NA_character_
+reference_group <- NA_character_
+contrast_name <- NULL
 
-if (!all(c(test_group, reference_group) %in% sample_table$group)) {
-    stop(
-        "Contrast groups not found in sample table. Requested: ",
-        paste(c(test_group, reference_group), collapse = ", "),
-        "; available: ",
-        paste(unique(sample_table$group), collapse = ", ")
-    )
-}
+if (run_dmr) {
+    if (is.null(arg$contrast) || arg$contrast == "") {
+        stop("--contrast is required when --analysis_mode dmr")
+    }
+    contrast <- strsplit(arg$contrast, ",", fixed = TRUE)[[1]]
+    contrast <- trimws(contrast)
+    if (length(contrast) != 2) {
+        stop("--contrast must be formatted as test,reference, for example KD,control")
+    }
+    test_group <- contrast[[1]]
+    reference_group <- contrast[[2]]
+    contrast_name <- paste0(test_group, "_vs_", reference_group)
 
-sample_table <- sample_table[sample_table$group %in% c(test_group, reference_group), , drop = FALSE]
-sample_table$group <- factor(sample_table$group)
-sample_table$group <- relevel(sample_table$group, ref = reference_group)
+    if (!all(c(test_group, reference_group) %in% sample_table$group)) {
+        stop(
+            "Contrast groups not found in sample table. Requested: ",
+            paste(c(test_group, reference_group), collapse = ", "),
+            "; available: ",
+            paste(unique(sample_table$group), collapse = ", ")
+        )
+    }
+
+    sample_table <- sample_table[sample_table$group %in% c(test_group, reference_group), , drop = FALSE]
+    sample_table$group <- factor(sample_table$group)
+    sample_table$group <- relevel(sample_table$group, ref = reference_group)
+} else {
+    sample_table$group <- factor(sample_table$group)
+}
 sample_table$batch <- factor(sample_table$batch)
 
 write.table(
@@ -183,7 +205,9 @@ save(qsea_set, file = file.path(outdir, "qseaSet.RData"))
 save(qsea_set_blind, file = file.path(outdir, "qseaSet_blind.RData"))
 
 sample_data <- qsea_set_blind@sampleTable
-design <- if (use_batch) {
+design <- if (!run_dmr) {
+    model.matrix(~ 1, sample_data)
+} else if (use_batch) {
     model.matrix(~ batch + group, sample_data)
 } else {
     model.matrix(~ group, sample_data)
@@ -205,13 +229,14 @@ qsea_glm <- fitNBglm(
     minRowSum = min_row_sum
 )
 
-contrast_name <- paste0(test_group, "_vs_", reference_group)
-qsea_glm <- addContrast(
-    qsea_set_blind,
-    qsea_glm,
-    coef = ncol(design),
-    name = contrast_name
-)
+if (run_dmr) {
+    qsea_glm <- addContrast(
+        qsea_set_blind,
+        qsea_glm,
+        coef = ncol(design),
+        name = contrast_name
+    )
+}
 
 save(qsea_glm, file = file.path(outdir, "qsea_glm.RData"))
 
@@ -254,7 +279,11 @@ beta_cols <- grep("_beta$|_beta_means$", names(result_all), value = TRUE)
 count_cols <- grep("_counts$|_counts_means$", names(result_all), value = TRUE)
 coord_cols <- intersect(c("chr", "window_start", "window_end", "CpG_density"), names(result_all))
 id_cols <- "region_id"
-test_cols <- grep(paste0("^", contrast_name, "_"), names(result_all), value = TRUE)
+test_cols <- if (run_dmr) {
+    grep(paste0("^", contrast_name, "_"), names(result_all), value = TRUE)
+} else {
+    character(0)
+}
 stat_cols <- unique(c(id_cols, coord_cols, test_cols, "deltaBeta"))
 
 write.table(
@@ -386,16 +415,17 @@ write.table(
     row.names = FALSE
 )
 
-pvalue_col_all <- paste0(contrast_name, "_pvalue")
-if (!pvalue_col_all %in% names(result_all)) {
-    pvalue_col_all <- grep("_pvalue$", names(result_all), value = TRUE)[1]
-}
-
 result_all$dmr_significant <- FALSE
-if (!is.na(pvalue_col_all) && pvalue_col_all %in% names(result_all)) {
-    result_all$dmr_significant <- result_all[[pvalue_col_all]] <= fdr
+if (run_dmr) {
+    pvalue_col_all <- paste0(contrast_name, "_pvalue")
+    if (!pvalue_col_all %in% names(result_all)) {
+        pvalue_col_all <- grep("_pvalue$", names(result_all), value = TRUE)[1]
+    }
+    if (!is.na(pvalue_col_all) && pvalue_col_all %in% names(result_all)) {
+        result_all$dmr_significant <- result_all[[pvalue_col_all]] <= fdr
+    }
 }
-if ("deltaBeta" %in% names(result_all)) {
+if (run_dmr && "deltaBeta" %in% names(result_all)) {
     result_all$dmr_filtered <- result_all$dmr_significant & abs(result_all$deltaBeta) >= delta_beta
 } else {
     result_all$dmr_filtered <- FALSE
@@ -411,39 +441,44 @@ write.table(
     row.names = FALSE
 )
 
-message("Selecting DMRs")
-sig <- isSignificant(qsea_glm, fdr_th = fdr, direction = "both")
-result_sig <- makeTable(
-    qs = qsea_set_blind,
-    glm = qsea_glm,
-    keep = sig,
-    samples = getSampleNames(qsea_set_blind),
-    groupMeans = getSampleGroups(qsea_set_blind),
-    norm_method = c("counts", "beta")
-)
+if (run_dmr) {
+    message("Selecting DMRs")
+    sig <- isSignificant(qsea_glm, fdr_th = fdr, direction = "both")
+    result_sig <- makeTable(
+        qs = qsea_set_blind,
+        glm = qsea_glm,
+        keep = sig,
+        samples = getSampleNames(qsea_set_blind),
+        groupMeans = getSampleGroups(qsea_set_blind),
+        norm_method = c("counts", "beta")
+    )
 
-if (nrow(result_sig) > 0 && length(beta_mean_cols) >= 2) {
-    if (all(c("chr", "window_start", "window_end") %in% names(result_sig))) {
-        result_sig$region_id <- paste(result_sig$chr, result_sig$window_start, result_sig$window_end, sep = ":")
-    } else {
-        result_sig$region_id <- paste0("region_", seq_len(nrow(result_sig)))
+    if (nrow(result_sig) > 0 && length(beta_mean_cols) >= 2) {
+        if (all(c("chr", "window_start", "window_end") %in% names(result_sig))) {
+            result_sig$region_id <- paste(result_sig$chr, result_sig$window_start, result_sig$window_end, sep = ":")
+        } else {
+            result_sig$region_id <- paste0("region_", seq_len(nrow(result_sig)))
+        }
+        sig_beta_mean_cols <- grep("_beta_means$", names(result_sig), value = TRUE)
+        result_sig <- result_sig[complete.cases(result_sig[, sig_beta_mean_cols, drop = FALSE]), ]
+        result_sig$deltaBeta <- result_sig[, sig_beta_mean_cols[2]] - result_sig[, sig_beta_mean_cols[1]]
     }
-    sig_beta_mean_cols <- grep("_beta_means$", names(result_sig), value = TRUE)
-    result_sig <- result_sig[complete.cases(result_sig[, sig_beta_mean_cols, drop = FALSE]), ]
-    result_sig$deltaBeta <- result_sig[, sig_beta_mean_cols[2]] - result_sig[, sig_beta_mean_cols[1]]
-}
 
-pvalue_col <- paste0(contrast_name, "_pvalue")
-if (!pvalue_col %in% names(result_sig)) {
-    pvalue_col <- grep("_pvalue$", names(result_sig), value = TRUE)[1]
-}
+    pvalue_col <- paste0(contrast_name, "_pvalue")
+    if (!pvalue_col %in% names(result_sig)) {
+        pvalue_col <- grep("_pvalue$", names(result_sig), value = TRUE)[1]
+    }
 
-result_dmr <- result_sig
-if (!is.na(pvalue_col) && pvalue_col %in% names(result_dmr)) {
-    result_dmr <- result_dmr[result_dmr[[pvalue_col]] <= fdr, , drop = FALSE]
-}
-if ("deltaBeta" %in% names(result_dmr)) {
-    result_dmr <- result_dmr[abs(result_dmr$deltaBeta) >= delta_beta, , drop = FALSE]
+    result_dmr <- result_sig
+    if (!is.na(pvalue_col) && pvalue_col %in% names(result_dmr)) {
+        result_dmr <- result_dmr[result_dmr[[pvalue_col]] <= fdr, , drop = FALSE]
+    }
+    if ("deltaBeta" %in% names(result_dmr)) {
+        result_dmr <- result_dmr[abs(result_dmr$deltaBeta) >= delta_beta, , drop = FALSE]
+    }
+} else {
+    result_sig <- result_all[0, , drop = FALSE]
+    result_dmr <- result_all[0, , drop = FALSE]
 }
 
 write.table(
@@ -513,10 +548,12 @@ write.table(
 )
 
 summary_lines <- c(
+    paste("analysis_mode", analysis_mode, sep = "\t"),
     paste("samples", nrow(sample_table), sep = "\t"),
     paste("test_group", test_group, sep = "\t"),
     paste("reference_group", reference_group, sep = "\t"),
-    paste("design", ifelse(use_batch, "~ batch + group", "~ group"), sep = "\t"),
+    paste("design", ifelse(!run_dmr, "~ 1", ifelse(use_batch, "~ batch + group", "~ group")), sep = "\t"),
+    paste("dmr_performed", run_dmr, sep = "\t"),
     paste("windows_total", length(regions), sep = "\t"),
     paste("windows_with_cpg_density_for_enrichment", length(window_idx), sep = "\t"),
     paste("significant_regions", nrow(result_sig), sep = "\t"),

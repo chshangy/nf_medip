@@ -22,7 +22,7 @@ parse_args <- function(args) {
 }
 
 arg <- parse_args(commandArgs(trailingOnly = TRUE))
-required <- c("sample_table", "outdir", "bsgenome", "contrast")
+required <- c("sample_table", "outdir", "bsgenome")
 missing <- setdiff(required, names(arg))
 if (length(missing) > 0) {
     stop("Missing required arguments: ", paste(missing, collapse = ", "))
@@ -66,6 +66,16 @@ message("Starting MEDIPS analysis")
 message("Sample table: ", arg$sample_table)
 message("Output directory: ", outdir)
 
+analysis_mode <- arg$analysis_mode
+if (is.null(analysis_mode) || analysis_mode == "") {
+    analysis_mode <- "matrix"
+}
+if (!analysis_mode %in% c("matrix", "dmr")) {
+    stop("--analysis_mode must be either matrix or dmr")
+}
+run_dmr <- analysis_mode == "dmr"
+message("Analysis mode: ", analysis_mode)
+
 sample_table <- fread(arg$sample_table)
 required_cols <- c("sample_name", "file_name", "group", "samples", "batch")
 missing_cols <- setdiff(required_cols, names(sample_table))
@@ -73,20 +83,30 @@ if (length(missing_cols) > 0) {
     stop("Sample table is missing required columns: ", paste(missing_cols, collapse = ", "))
 }
 
-contrast_groups <- strsplit(arg$contrast, ",", fixed = TRUE)[[1]]
-if (length(contrast_groups) != 2) {
-    stop("--contrast must be formatted as test_group,reference_group")
-}
-test_group <- contrast_groups[[1]]
-reference_group <- contrast_groups[[2]]
-contrast_name <- paste(test_group, "vs", reference_group, sep = "_")
+test_group <- NA_character_
+reference_group <- NA_character_
+contrast_name <- NULL
 
-sample_table <- sample_table[group %in% c(test_group, reference_group)]
+if (run_dmr) {
+    if (is.null(arg$contrast) || arg$contrast == "") {
+        stop("--contrast is required when --analysis_mode dmr")
+    }
+    contrast_groups <- strsplit(arg$contrast, ",", fixed = TRUE)[[1]]
+    contrast_groups <- trimws(contrast_groups)
+    if (length(contrast_groups) != 2) {
+        stop("--contrast must be formatted as test_group,reference_group")
+    }
+    test_group <- contrast_groups[[1]]
+    reference_group <- contrast_groups[[2]]
+    contrast_name <- paste(test_group, "vs", reference_group, sep = "_")
+
+    sample_table <- sample_table[group %in% c(test_group, reference_group)]
+}
 sample_table <- sample_table[order(sample_name)]
 if (nrow(sample_table) == 0) {
-    stop("No samples remain after filtering to contrast groups")
+    stop("No samples remain after filtering")
 }
-if (!all(c(test_group, reference_group) %in% sample_table$group)) {
+if (run_dmr && !all(c(test_group, reference_group) %in% sample_table$group)) {
     stop("Both contrast groups must be present in the sample table")
 }
 
@@ -136,15 +156,20 @@ coupling_set <- MEDIPS.couplingVector(pattern = pattern, refObj = medips_sets[[1
 save(medips_sets, file = file.path(outdir, "medips_sets.RData"))
 save(coupling_set, file = file.path(outdir, "medips_coupling_set.RData"))
 
-reference_samples <- sample_table[group == reference_group]$sample_name
-test_samples <- sample_table[group == test_group]$sample_name
-reference_sets <- medips_sets[reference_samples]
-test_sets <- medips_sets[test_samples]
+if (run_dmr) {
+    reference_samples <- sample_table[group == reference_group]$sample_name
+    test_samples <- sample_table[group == test_group]$sample_name
+    mset1 <- medips_sets[reference_samples]
+    mset2 <- medips_sets[test_samples]
+} else {
+    mset1 <- medips_sets
+    mset2 <- NULL
+}
 
 message("Running MEDIPS.meth")
 medips_result <- MEDIPS.meth(
-    MSet1 = reference_sets,
-    MSet2 = test_sets,
+    MSet1 = mset1,
+    MSet2 = mset2,
     CSet = coupling_set,
     chr = chr_select,
     p.adj = p_adj,
@@ -191,21 +216,24 @@ if (has_coordinates) {
 logfc_col <- if ("edgeR.logFC" %in% names(result_all)) "edgeR.logFC" else "score.log2.ratio"
 pvalue_col <- if ("edgeR.p.value" %in% names(result_all)) "edgeR.p.value" else "score.p.value"
 adjp_col <- if ("edgeR.adj.p.value" %in% names(result_all)) "edgeR.adj.p.value" else "score.adj.p.value"
+logfc_col <- if (!is.na(logfc_col) && logfc_col %in% names(result_all)) logfc_col else NA_character_
+pvalue_col <- if (!is.na(pvalue_col) && pvalue_col %in% names(result_all)) pvalue_col else NA_character_
+adjp_col <- if (!is.na(adjp_col) && adjp_col %in% names(result_all)) adjp_col else NA_character_
 
-contrast_logfc_col <- paste0(contrast_name, "_log2FC")
-contrast_pvalue_col <- paste0(contrast_name, "_pvalue")
-contrast_adjp_col <- paste0(contrast_name, "_adjPval")
+contrast_logfc_col <- if (run_dmr) paste0(contrast_name, "_log2FC") else NA_character_
+contrast_pvalue_col <- if (run_dmr) paste0(contrast_name, "_pvalue") else NA_character_
+contrast_adjp_col <- if (run_dmr) paste0(contrast_name, "_adjPval") else NA_character_
 
-if (!is.na(logfc_col) && logfc_col %in% names(result_all)) {
+if (run_dmr && !is.na(logfc_col) && logfc_col %in% names(result_all)) {
     # MEDIPS.meth reports log2(MSet1/MSet2). In this workflow MSet1 is the
     # reference group and MSet2 is the test group, so invert the sign to
     # match the user-facing test_vs_reference convention used by QSEA.
     result_all[[contrast_logfc_col]] <- -result_all[[logfc_col]]
 }
-if (!is.na(pvalue_col) && pvalue_col %in% names(result_all)) {
+if (run_dmr && !is.na(pvalue_col) && pvalue_col %in% names(result_all)) {
     result_all[[contrast_pvalue_col]] <- result_all[[pvalue_col]]
 }
-if (!is.na(adjp_col) && adjp_col %in% names(result_all)) {
+if (run_dmr && !is.na(adjp_col) && adjp_col %in% names(result_all)) {
     result_all[[contrast_adjp_col]] <- result_all[[adjp_col]]
 }
 
@@ -217,11 +245,11 @@ if (length(rms_mean_cols) >= 2) {
 }
 
 result_all$dmr_significant <- FALSE
-if (!is.na(adjp_col) && adjp_col %in% names(result_all)) {
+if (run_dmr && !is.na(adjp_col) && adjp_col %in% names(result_all)) {
     result_all$dmr_significant <- result_all[[adjp_col]] <= fdr
 }
 result_all$dmr_filtered <- result_all$dmr_significant
-if (!is.na(logfc_col) && logfc_col %in% names(result_all)) {
+if (run_dmr && !is.na(logfc_col) && logfc_col %in% names(result_all)) {
     result_all$dmr_filtered <- result_all$dmr_filtered & abs(result_all[[logfc_col]]) >= min_abs_log2fc
 }
 
@@ -420,10 +448,12 @@ write.table(
 )
 
 summary_lines <- c(
+    paste("analysis_mode", analysis_mode, sep = "\t"),
     paste("samples", nrow(sample_table), sep = "\t"),
     paste("test_group", test_group, sep = "\t"),
     paste("reference_group", reference_group, sep = "\t"),
-    paste("design", "MEDIPS.meth two-group comparison", sep = "\t"),
+    paste("design", ifelse(run_dmr, "MEDIPS.meth two-group comparison", "MEDIPS.meth coverage summary"), sep = "\t"),
+    paste("dmr_performed", run_dmr, sep = "\t"),
     paste("window_size", window_size, sep = "\t"),
     paste("diff_method", diff_method, sep = "\t"),
     paste("diffnorm", diffnorm, sep = "\t"),

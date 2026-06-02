@@ -502,3 +502,32 @@ review_qsea_light/qsea/qsea_dmr_filtered_annotated.tsv
 review_qsea_light/qsea/qsea_dmr_significant.tsv
 review_qsea_light/qsea/qsea_sample_table.used.tsv
 ```
+
+## Analysis Mode Design
+
+The methylation analysis stage now separates method selection from analysis intent:
+
+```text
+--analysis_method qsea
+--analysis_method medips
+--analysis_method both
+
+--analysis_mode matrix
+--analysis_mode dmr
+```
+
+`--analysis_mode matrix` is for datasets without group/contrast information. It runs the selected methylation method and writes matrix/region outputs only. DMR output files are still created as empty tables so the Nextflow output contract remains stable.
+
+`--analysis_mode dmr` is for datasets with group information and a pairwise contrast. It requires:
+
+```text
+--contrast test,reference
+```
+
+In DMR mode, the selected method writes both matrix outputs and DMR outputs. There is no separate `both` analysis mode; matrix outputs are always produced, and DMR outputs are added only when `--analysis_mode dmr` is used.
+
+Implementation notes:
+
+- QSEA matrix mode uses an intercept-only design (`~ 1`) and skips `addContrast()`/`isSignificant()`.
+- MEDIPS matrix mode calls `MEDIPS.meth()` with all samples in `MSet1` and no `MSet2`, using MEDIPS coverage summarization without differential testing.
+- Existing QSEA and MEDIPS HPC DMR PBS scripts now include `--analysis_mode dmr` explicitly.

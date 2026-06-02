@@ -1501,3 +1501,44 @@ scripts/run_qsea_test.pbs
 scripts/run_medips_test.pbs
 nextflow.config
 ```
+
+## 2026-06-02: Add Matrix vs DMR Analysis Mode
+
+Decision:
+
+- Use `--analysis_mode matrix` for no-group/no-contrast datasets.
+- Use `--analysis_mode dmr` when group information and `--contrast test,reference` are provided.
+- Do not add a separate `both` mode. Matrix outputs are always produced by QSEA/MEDIPS; DMR outputs are only populated in DMR mode.
+
+Code updates:
+
+- Added `params.analysis_mode = 'matrix'` to `nextflow.config`.
+- Added validation in `main.nf` for `matrix`/`dmr`.
+- `main.nf` now requires `--contrast` only when `--analysis_mode dmr` is requested.
+- QSEA and MEDIPS modules pass `--analysis_mode` to their R scripts and pass `--contrast` only in DMR mode.
+- `bin/qsea_create_dmr.R` supports matrix mode with an intercept-only design and empty DMR output tables.
+- `bin/medips_create_dmr.R` supports matrix mode by running `MEDIPS.meth()` with all samples as `MSet1` and no `MSet2`.
+- DMR test PBS scripts now include `--analysis_mode dmr` explicitly.
+
+Expected usage:
+
+```bash
+# Matrix-only QSEA run, no group/contrast required
+nextflow run . -profile hpc_singularity \
+  --input test_data/samplesheet.csv \
+  --fasta /path/to/GRCh38.fa \
+  --analysis_method qsea \
+  --analysis_mode matrix \
+  --outdir results/qsea_matrix_test \
+  -resume
+
+# QSEA DMR run, group and contrast required
+nextflow run . -profile hpc_singularity \
+  --input test_data/samplesheet.csv \
+  --fasta /path/to/GRCh38.fa \
+  --analysis_method qsea \
+  --analysis_mode dmr \
+  --contrast KD,control \
+  --outdir results/qsea_dmr_test \
+  -resume
+```

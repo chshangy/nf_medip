@@ -35,6 +35,18 @@ workflow {
         error "Please provide the BWA-indexed reference FASTA with --fasta"
     }
 
+    if (!(params.analysis_mode in ['matrix', 'dmr'])) {
+        error "Unsupported --analysis_mode '${params.analysis_mode}'. Use 'matrix' or 'dmr'."
+    }
+
+    if (!(params.analysis_method in ['none', 'qsea', 'medips', 'both'])) {
+        error "Unsupported --analysis_method '${params.analysis_method}'. Use 'none', 'qsea', 'medips', or 'both'."
+    }
+
+    if (params.analysis_method != 'none' && params.analysis_mode == 'dmr' && !params.contrast) {
+        error "Please provide --contrast test,reference when --analysis_mode dmr is requested"
+    }
+
     INPUT_CHECK(params.input)
     ch_reads = INPUT_CHECK.out.reads
 
@@ -81,10 +93,6 @@ workflow {
     BAM_COVERAGE(BAM_FILTER.out.bam_bai)
 
     if (params.analysis_method in ['qsea', 'both']) {
-        if (!params.contrast) {
-            error "Please provide --contrast test,reference when --analysis_method is qsea or both"
-        }
-
         ch_qsea_sample_records = BAM_FILTER.out.bam_bai
             .map { meta, bam, bai ->
                 [
@@ -107,10 +115,6 @@ workflow {
     }
 
     if (params.analysis_method in ['medips', 'both']) {
-        if (!params.contrast) {
-            error "Please provide --contrast test,reference when --analysis_method is medips or both"
-        }
-
         ch_medips_sample_records = BAM_FILTER.out.bam_bai
             .map { meta, bam, bai ->
                 [

@@ -23,5 +23,6 @@ nextflow run . \
   --fasta /projects/sychen/projects/patnsb/ebv_kd_medip/ref/GRCh38.p14.genome.fa \
   --outdir results/fastq_to_bam_test \
   --analysis_method qsea \
+  --analysis_mode dmr \
   --contrast KD,control \
   -resume
